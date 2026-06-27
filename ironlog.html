@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>IronLog – Workout Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+--bg:#0a0a0b;--bg1:#111114;--bg2:#1a1a1f;--bg3:#222228;--bg4:#2a2a32;
+--blue:#3b82f6;--blue2:#1d4ed8;--blue3:#60a5fa;--blue4:#93c5fd;
+--text:#f0f0f5;--text2:#a0a0b0;--text3:#606070;
+--green:#22c55e;--red:#ef4444;--amber:#f59e0b;--purple:#a855f7;
+--glass:rgba(255,255,255,0.04);--glassborder:rgba(255,255,255,0.08);
+--r:12px;--r2:8px;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;display:flex;flex-direction:column;font-size:14px;overscroll-behavior:none}
+#app{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:70px}
+h1,h2,h3{font-weight:700}
+.screen{display:none;animation:fadeIn 0.2s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes badgePop{0%{transform:scale(0.5);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(-180px) rotate(540deg);opacity:0}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+.nav{background:rgba(10,10,11,0.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--glassborder);display:flex;flex-shrink:0;padding:8px 0 max(8px,env(safe-area-inset-bottom))}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px;cursor:pointer;color:var(--text3);font-size:10px;font-weight:500;border:none;background:none;transition:color 0.15s;letter-spacing:0.2px}
+.nav-btn.active{color:var(--blue)}
+.nav-btn svg{width:22px;height:22px;stroke-width:1.8;stroke:currentColor;fill:none}
+.header{padding:52px 16px 12px}
+.header h1{font-size:26px;font-weight:800;letter-spacing:-0.5px}
+.sub{color:var(--text2);font-size:13px;margin-top:3px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.2px}
+.badge.blue{background:rgba(59,130,246,0.15);color:var(--blue3)}
+.badge.green{background:rgba(34,197,94,0.15);color:var(--green)}
+.badge.amber{background:rgba(245,158,11,0.15);color:var(--amber)}
+.badge.red{background:rgba(239,68,68,0.15);color:var(--red)}
+.badge.purple{background:rgba(168,85,247,0.15);color:var(--purple)}
+.card{background:var(--bg2);border:1px solid var(--glassborder);border-radius:var(--r);padding:14px;margin:0 16px 10px}
+.card2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:10px}
+.stat{background:var(--bg2);border:1px solid var(--glassborder);border-radius:var(--r);padding:12px 14px}
+.stat-lbl{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:800;letter-spacing:-0.5px}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.sec{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;padding:0 16px;margin:14px 0 8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;border-radius:var(--r2);border:none;cursor:pointer;font-size:13px;font-weight:700;transition:all 0.12s;letter-spacing:0.2px;-webkit-appearance:none}
+.btn-p{background:var(--blue);color:#fff}
+.btn-p:active{background:var(--blue2);transform:scale(0.98)}
+.btn-s{background:var(--bg3);color:var(--text);border:1px solid var(--glassborder)}
+.btn-s:active{background:var(--bg4);transform:scale(0.98)}
+.btn-full{width:100%}
+.pbar-wrap{background:var(--bg3);border-radius:4px;height:6px;overflow:hidden}
+.pbar{height:100%;border-radius:4px;transition:width 0.5s ease}
+.pbar.blue{background:var(--blue)}
+.pbar.green{background:var(--green)}
+.pbar.amber{background:var(--amber)}
+.pbar.red{background:var(--red)}
+.tabs{display:flex;gap:6px;padding:0 16px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;border:1px solid var(--glassborder);background:transparent;color:var(--text2);transition:all 0.12s;flex-shrink:0}
+.tab.active{background:var(--blue);color:#fff;border-color:transparent}
+.ex-card{background:var(--bg2);border:1px solid var(--glassborder);border-radius:var(--r);margin:0 16px 8px;overflow:hidden}
+.ex-hdr{padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.ex-ico{width:42px;height:42px;border-radius:var(--r2);background:rgba(59,130,246,0.12);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ex-name{font-size:15px;font-weight:700}
+.ex-meta{font-size:11px;color:var(--text2);margin-top:2px}
+.ex-body{padding:0 14px 14px;display:none}
+.ex-body.open{display:block}
+.set-row{display:grid;grid-template-columns:28px 1fr 1fr 38px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--glassborder);transition:background 0.2s}
+.set-row:last-child{border:none}
+.set-row.done-row{background:rgba(34,197,94,0.05);border-radius:var(--r2)}
+.set-num{font-size:12px;color:var(--text3);text-align:center;font-weight:700}
+.set-in{background:var(--bg3);border:1px solid var(--glassborder);border-radius:var(--r2);padding:8px 6px;color:var(--text);font-size:14px;font-weight:700;text-align:center;width:100%;outline:none;-webkit-appearance:none}
+.set-in:focus{border-color:var(--blue);background:var(--bg4)}
+.set-chk{width:34px;height:34px;border-radius:50%;border:2px solid var(--glassborder);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;background:transparent;flex-shrink:0}
+.set-chk.done{background:var(--green);border-color:var(--green)}
+.bar-chart{display:flex;align-items:flex-end;gap:4px;padding-bottom:20px}
+.bar{flex:1;border-radius:3px 3px 0 0;position:relative;min-height:3px;transition:height 0.4s ease}
+.bar-lbl{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--text3);white-space:nowrap;font-weight:600}
+.heatmap{display:grid;grid-template-columns:repeat(18,1fr);gap:3px;padding:0 16px}
+.hc{aspect-ratio:1;border-radius:2px;background:var(--bg3)}
+.hc.l1{background:rgba(59,130,246,0.2)}
+.hc.l2{background:rgba(59,130,246,0.45)}
+.hc.l3{background:rgba(59,130,246,0.7)}
+.hc.l4{background:var(--blue)}
+.ach{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border:1px solid var(--glassborder);border-radius:var(--r);margin:0 16px 8px}
+.ach.locked{opacity:0.4}
+.ach-ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.ach-ico.gold{background:linear-gradient(135deg,#92400e,#f59e0b)}
+.ach-ico.blue{background:linear-gradient(135deg,#1e3a8a,#3b82f6)}
+.ach-ico.green{background:linear-gradient(135deg,#14532d,#22c55e)}
+.ach-ico.purple{background:linear-gradient(135deg,#581c87,#a855f7)}
+.ach-ico.amber{background:linear-gradient(135deg,#78350f,#f59e0b)}
+.xp-wrap{background:var(--bg3);border-radius:6px;height:8px;overflow:hidden}
+.xp-bar{height:100%;background:linear-gradient(90deg,var(--purple),#ec4899);border-radius:6px;transition:width 0.8s ease}
+.insight{display:flex;align-items:flex-start;gap:10px;padding:12px;background:var(--bg2);border-radius:var(--r2);margin-bottom:8px;border-left:3px solid}
+.insight.blue{border-color:var(--blue)}
+.insight.green{border-color:var(--green)}
+.insight.amber{border-color:var(--amber)}
+.insight.red{border-color:var(--red)}
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--glassborder)}
+.tog-row:last-child{border:none}
+.toggle{position:relative;width:44px;height:26px;cursor:pointer;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.tog-sl{position:absolute;inset:0;background:var(--bg3);border-radius:13px;transition:0.2s}
+.tog-sl:before{content:'';position:absolute;width:20px;height:20px;top:3px;left:3px;background:var(--text3);border-radius:50%;transition:0.2s}
+.toggle input:checked+.tog-sl{background:var(--blue)}
+.toggle input:checked+.tog-sl:before{transform:translateX(18px);background:#fff}
+.mbar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mbar-name{font-size:13px;font-weight:600;min-width:82px}
+.mbar-pct{font-size:12px;font-weight:800;min-width:36px;text-align:right}
+.macro-wrap{display:flex;justify-content:space-around;margin:8px 0}
+.macro-item{display:flex;flex-direction:column;align-items:center;gap:4px}
+.mac-ring{width:64px;height:64px;position:relative}
+.mac-ring svg{transform:rotate(-90deg)}
+.mac-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.rec-row{margin-bottom:12px}
+.rec-lbl{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.rec-lbl span:last-child{font-weight:800;color:var(--blue3)}
+input[type=range]{width:100%;accent-color:var(--blue);height:20px;cursor:pointer}
+.cal-hdr{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 16px;margin-bottom:4px}
+.cal-hdr span{text-align:center;font-size:10px;color:var(--text3);font-weight:700}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:0 16px}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;border-radius:8px;cursor:pointer}
+.cal-day.rest{background:var(--bg3);color:var(--text3)}
+.cal-day.workout{background:rgba(59,130,246,0.2);color:var(--blue3)}
+.cal-day.pr{background:rgba(245,158,11,0.2);color:var(--amber)}
+.cal-day.missed{background:rgba(239,68,68,0.1);color:var(--red)}
+.cal-day.today{background:var(--blue);color:#fff;font-weight:800}
+.tag{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:6px;font-size:11px;background:var(--bg3);color:var(--text2);margin:2px;font-weight:500}
+.pr-badge{background:linear-gradient(135deg,#92400e,#f59e0b);color:#fff;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:800;letter-spacing:0.3px}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:1px solid var(--glassborder);border-radius:20px;padding:9px 20px;font-size:13px;font-weight:700;z-index:500;opacity:0;transition:all 0.22s;white-space:nowrap;pointer-events:none}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:flex-end}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg1);border-radius:24px 24px 0 0;width:100%;padding:20px;animation:slideUp 0.25s ease;max-height:80vh;overflow-y:auto}
+.modal-handle{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
+#prModal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:none;align-items:center;justify-content:center}
+#prModal.open{display:flex}
+.pr-card{background:var(--bg2);border:2px solid var(--amber);border-radius:var(--r);padding:28px 24px;margin:20px;text-align:center;animation:badgePop 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+.cpiece{position:fixed;width:8px;height:8px;border-radius:2px;pointer-events:none;z-index:400;animation:confettiFall 1s ease forwards}
+#floatTimer{position:fixed;top:52px;right:12px;background:var(--bg2);border:1px solid var(--blue);border-radius:var(--r);padding:7px 12px;z-index:150;display:none;align-items:center;gap:8px;backdrop-filter:blur(12px)}
+#floatTimer.show{display:flex}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+<!-- HOME -->
+<div class="screen active" id="s-home">
+  <div class="header">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div id="greeting" style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:4px">Good morning 👋</div>
+        <h1 style="font-size:28px;letter-spacing:-1px">IronLog</h1>
+      </div>
+      <div style="text-align:right">
+        <div id="todayDate" style="font-size:11px;color:var(--text3)"></div>
+        <div class="badge blue" style="margin-top:5px">🔥 7 day streak</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="background:linear-gradient(135deg,rgba(29,78,216,0.28),rgba(59,130,246,0.08));border-color:rgba(59,130,246,0.3)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <div>
+        <div style="font-size:11px;color:var(--blue3);font-weight:700;text-transform:uppercase;letter-spacing:0.6px">Today · Day 1</div>
+        <div style="font-size:19px;font-weight:800;margin-top:3px;letter-spacing:-0.3px">Back Width + Biceps</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px">7 exercises · ~60 min · ~12,400kg</div>
+      </div>
+      <div style="font-size:32px">💪</div>
+    </div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">
+      <span class="tag">🔝 Pull Ups</span><span class="tag">🔽 Lat Pulldown</span><span class="tag">↔️ CSR</span><span class="tag">+4 more</span>
+    </div>
+    <button class="btn btn-p btn-full" onclick="goWorkout()">Start Workout →</button>
+  </div>
+
+  <div class="card2">
+    <div class="stat"><div class="stat-lbl">Body Weight</div><div class="stat-val">82.5<span style="font-size:13px;color:var(--text2)"> kg</span></div><div class="stat-sub" style="color:var(--green)">▼ 0.3kg this week</div></div>
+    <div class="stat"><div class="stat-lbl">Weekly Volume</div><div class="stat-val">24.6k<span style="font-size:13px;color:var(--text2)">kg</span></div><div class="stat-sub" style="color:var(--green)">▲ 8% vs last week</div></div>
+  </div>
+  <div class="card2">
+    <div class="stat"><div class="stat-lbl">Current Streak</div><div class="stat-val">🔥 7<span style="font-size:13px;color:var(--text2)"> days</span></div><div class="stat-sub">Best: 23 days</div></div>
+    <div class="stat"><div class="stat-lbl">This Week</div><div class="stat-val">4<span style="font-size:13px;color:var(--text2)"> / 6</span></div><div class="stat-sub" style="color:var(--amber)">2 days left</div></div>
+  </div>
+
+  <div class="sec">Weekly Volume</div>
+  <div class="card">
+    <div class="bar-chart" style="height:70px">
+      <div class="bar" style="background:var(--blue);height:82%"><div class="bar-lbl">Mon</div></div>
+      <div class="bar" style="background:var(--blue);height:68%"><div class="bar-lbl">Tue</div></div>
+      <div class="bar" style="background:var(--blue);height:90%"><div class="bar-lbl">Wed</div></div>
+      <div class="bar" style="background:rgba(59,130,246,0.2);height:28%"><div class="bar-lbl">Thu</div></div>
+      <div class="bar" style="background:var(--blue);height:75%"><div class="bar-lbl">Fri</div></div>
+      <div class="bar" style="background:rgba(59,130,246,0.12);height:12%"><div class="bar-lbl">Sat</div></div>
+      <div class="bar" style="background:rgba(59,130,246,0.06);height:5%"><div class="bar-lbl">Sun</div></div>
+    </div>
+  </div>
+
+  <div class="sec">Muscle Recovery</div>
+  <div class="card" id="homeRecovery"></div>
+
+  <div class="sec">Smart Insights</div>
+  <div style="padding:0 16px" id="homeInsights"></div>
+
+  <div class="sec">Level & XP</div>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--purple),#ec4899);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;flex-shrink:0">14</div>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:700">Iron Beast</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:6px">2,340 / 3,000 XP → Level 15</div>
+        <div class="xp-wrap"><div class="xp-bar" style="width:78%"></div></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:8px"><div style="font-size:20px;font-weight:800;color:var(--purple)">14</div><div style="font-size:10px;color:var(--text3)">Level</div></div>
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:8px"><div style="font-size:20px;font-weight:800;color:var(--amber)">23</div><div style="font-size:10px;color:var(--text3)">Badges</div></div>
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:8px"><div style="font-size:20px;font-weight:800;color:var(--blue)">156</div><div style="font-size:10px;color:var(--text3)">Workouts</div></div>
+    </div>
+  </div>
+
+  <div class="sec">Next Workout</div>
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="font-size:30px">🦵</div>
+      <div style="flex:1"><div style="font-size:15px;font-weight:700">Legs + Abs</div><div style="font-size:12px;color:var(--text2)">Tomorrow · Day 3 · 8 exercises</div></div>
+      <div class="badge blue">Day 3</div>
+    </div>
+  </div>
+</div>
+
+<!-- WORKOUT -->
+<div class="screen" id="s-workout">
+  <div class="header" style="padding-bottom:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:11px;color:var(--text2);font-weight:600">Day <span id="wkDayNum">1</span></div>
+        <h1 style="font-size:22px;letter-spacing:-0.3px" id="wkName">Back Width + Biceps</h1>
+      </div>
+      <div style="text-align:right">
+        <div id="wkTimer" style="font-size:24px;font-weight:800;color:var(--blue);font-variant-numeric:tabular-nums">0:00</div>
+        <div style="font-size:10px;color:var(--text3)">duration</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabs" id="dayTabs"></div>
+  <div id="exList"></div>
+  <div style="padding:0 16px;margin:8px 0 16px">
+    <button class="btn btn-p btn-full" onclick="finishWorkout()">✓ Finish Workout</button>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="screen" id="s-progress">
+  <div class="header"><h1>Progress</h1><div class="sub">Your fitness journey</div></div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchPTab(this,'pt-analytics')">Analytics</div>
+    <div class="tab" onclick="switchPTab(this,'pt-calendar')">Calendar</div>
+    <div class="tab" onclick="switchPTab(this,'pt-body')">Body</div>
+    <div class="tab" onclick="switchPTab(this,'pt-prs')">PRs</div>
+    <div class="tab" onclick="switchPTab(this,'pt-streak')">Streak</div>
+    <div class="tab" onclick="switchPTab(this,'pt-nutrition')">Nutrition</div>
+  </div>
+
+  <div id="pt-analytics">
+    <div class="sec">Monthly Volume</div>
+    <div class="card">
+      <div class="bar-chart" style="height:80px">
+        <div class="bar" style="background:rgba(59,130,246,0.3);height:45%"><div class="bar-lbl">Jan</div></div>
+        <div class="bar" style="background:rgba(59,130,246,0.4);height:55%"><div class="bar-lbl">Feb</div></div>
+        <div class="bar" style="background:rgba(59,130,246,0.5);height:65%"><div class="bar-lbl">Mar</div></div>
+        <div class="bar" style="background:rgba(59,130,246,0.6);height:72%"><div class="bar-lbl">Apr</div></div>
+        <div class="bar" style="background:rgba(59,130,246,0.8);height:85%"><div class="bar-lbl">May</div></div>
+        <div class="bar" style="background:var(--blue);height:100%"><div class="bar-lbl">Jun</div></div>
+      </div>
+    </div>
+    <div class="sec">Strength Trends</div>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:11px;color:var(--text2)">Bench Press</div><div style="font-size:18px;font-weight:800;margin:3px 0">80kg</div><div style="font-size:11px;color:var(--green)">▲ +5kg / 30d</div></div>
+        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:11px;color:var(--text2)">Pull Ups</div><div style="font-size:18px;font-weight:800;margin:3px 0">12 reps</div><div style="font-size:11px;color:var(--green)">▲ +2 / 30d</div></div>
+        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:11px;color:var(--text2)">Squat</div><div style="font-size:18px;font-weight:800;margin:3px 0">100kg</div><div style="font-size:11px;color:var(--green)">▲ +7.5kg / 30d</div></div>
+        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:11px;color:var(--text2)">T-Bar Row</div><div style="font-size:18px;font-weight:800;margin:3px 0">70kg</div><div style="font-size:11px;color:var(--green)">▲ +5kg / 30d</div></div>
+      </div>
+    </div>
+    <div class="sec">Frequency</div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-around;text-align:center">
+        <div><div style="font-size:26px;font-weight:800;color:var(--blue)">4.8</div><div style="font-size:11px;color:var(--text2)">avg/week</div></div>
+        <div><div style="font-size:26px;font-weight:800;color:var(--green)">156</div><div style="font-size:11px;color:var(--text2)">total</div></div>
+        <div><div style="font-size:26px;font-weight:800;color:var(--amber)">62%</div><div style="font-size:11px;color:var(--text2)">consistency</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pt-calendar" style="display:none">
+    <div class="sec">June 2026</div>
+    <div class="cal-hdr"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div style="display:flex;gap:14px;padding:10px 16px;flex-wrap:wrap;margin-top:4px">
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(59,130,246,0.2)"></div><span style="font-size:11px;color:var(--text2)">Workout</span></div>
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(245,158,11,0.2)"></div><span style="font-size:11px;color:var(--text2)">PR</span></div>
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(239,68,68,0.1)"></div><span style="font-size:11px;color:var(--text2)">Missed</span></div>
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:var(--blue)"></div><span style="font-size:11px;color:var(--text2)">Today</span></div>
+    </div>
+  </div>
+
+  <div id="pt-body" style="display:none">
+    <div class="sec">Body Weight</div>
+    <div class="card">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px">
+        <div><div style="font-size:34px;font-weight:800;letter-spacing:-1px">82.5<span style="font-size:16px;font-weight:600;color:var(--text2)"> kg</span></div><div style="font-size:12px;color:var(--green)">▼ 2.3kg this month</div></div>
+        <div style="text-align:right"><div style="font-size:12px;color:var(--text2)">Goal: 79kg</div><div style="font-size:11px;color:var(--text3)">3.5kg remaining</div></div>
+      </div>
+      <div class="bar-chart" style="height:60px">
+        <div class="bar" style="background:rgba(59,130,246,0.4);height:100%"><div class="bar-lbl">W1</div></div>
+        <div class="bar" style="background:rgba(59,130,246,0.5);height:88%"><div class="bar-lbl">W2</div></div>
+        <div class="bar" style="background:rgba(59,130,246,0.7);height:78%"><div class="bar-lbl">W3</div></div>
+        <div class="bar" style="background:var(--blue);height:70%"><div class="bar-lbl">W4</div></div>
+      </div>
+    </div>
+    <div class="sec">Measurements</div>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
+        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:15px;font-weight:800">101</div><div style="font-size:10px;color:var(--text3)">Chest cm</div></div>
+        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:15px;font-weight:800">38</div><div style="font-size:10px;color:var(--text3)">Arm cm</div></div>
+        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:15px;font-weight:800">82</div><div style="font-size:10px;color:var(--text3)">Waist cm</div></div>
+        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:15px;font-weight:800">58</div><div style="font-size:10px;color:var(--text3)">Thigh cm</div></div>
+        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:15px;font-weight:800">36</div><div style="font-size:10px;color:var(--text3)">Calf cm</div></div>
+        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:15px;font-weight:800">38</div><div style="font-size:10px;color:var(--text3)">Neck cm</div></div>
+      </div>
+    </div>
+    <div class="sec">Recovery Log</div>
+    <div class="card">
+      <div class="rec-row"><div class="rec-lbl"><span>Energy</span><span id="sv0">7</span></div><input type="range" min="1" max="10" value="7" oninput="document.getElementById('sv0').textContent=this.value"></div>
+      <div class="rec-row"><div class="rec-lbl"><span>Mood</span><span id="sv1">8</span></div><input type="range" min="1" max="10" value="8" oninput="document.getElementById('sv1').textContent=this.value"></div>
+      <div class="rec-row"><div class="rec-lbl"><span>Soreness</span><span id="sv2">4</span></div><input type="range" min="1" max="10" value="4" oninput="document.getElementById('sv2').textContent=this.value"></div>
+      <div class="rec-row"><div class="rec-lbl"><span>Sleep Quality</span><span id="sv3">6</span></div><input type="range" min="1" max="10" value="6" oninput="document.getElementById('sv3').textContent=this.value"></div>
+      <div class="rec-row"><div class="rec-lbl"><span>Motivation</span><span id="sv4">9</span></div><input type="range" min="1" max="10" value="9" oninput="document.getElementById('sv4').textContent=this.value"></div>
+      <button class="btn btn-p btn-full" style="margin-top:8px" onclick="toast('Recovery logged ✓','green')">Log Recovery</button>
+    </div>
+  </div>
+
+  <div id="pt-prs" style="display:none">
+    <div class="sec">Personal Records</div>
+    <div id="prList"></div>
+  </div>
+
+  <div id="pt-streak" style="display:none">
+    <div class="card2">
+      <div class="stat"><div class="stat-lbl">Current Streak</div><div class="stat-val">🔥 7</div><div class="stat-sub">days</div></div>
+      <div class="stat"><div class="stat-lbl">Best Streak</div><div class="stat-val">🏆 23</div><div class="stat-sub">days</div></div>
+    </div>
+    <div class="card2">
+      <div class="stat"><div class="stat-lbl">This Month</div><div class="stat-val" style="color:var(--green)">78%</div><div class="stat-sub">consistency</div></div>
+      <div class="stat"><div class="stat-lbl">This Year</div><div class="stat-val" style="color:var(--blue)">71%</div><div class="stat-sub">consistency</div></div>
+    </div>
+    <div class="sec">Activity Heatmap</div>
+    <div class="heatmap" id="heatmapEl"></div>
+    <div style="display:flex;gap:6px;padding:8px 16px;align-items:center">
+      <span style="font-size:11px;color:var(--text3)">Less</span>
+      <div style="width:11px;height:11px;border-radius:2px;background:var(--bg3)"></div>
+      <div style="width:11px;height:11px;border-radius:2px;background:rgba(59,130,246,0.2)"></div>
+      <div style="width:11px;height:11px;border-radius:2px;background:rgba(59,130,246,0.45)"></div>
+      <div style="width:11px;height:11px;border-radius:2px;background:rgba(59,130,246,0.7)"></div>
+      <div style="width:11px;height:11px;border-radius:2px;background:var(--blue)"></div>
+      <span style="font-size:11px;color:var(--text3)">More</span>
+    </div>
+  </div>
+
+  <div id="pt-nutrition" style="display:none">
+    <div class="sec">Today's Nutrition</div>
+    <div class="card">
+      <div style="text-align:center;margin-bottom:14px">
+        <div style="font-size:36px;font-weight:800;color:var(--blue)">1,840</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:8px">/ 2,600 kcal goal</div>
+        <div class="pbar-wrap"><div class="pbar blue" style="width:71%"></div></div>
+      </div>
+      <div class="macro-wrap">
+        <div class="macro-item">
+          <div class="mac-ring"><svg viewBox="0 0 60 60" width="64" height="64"><circle cx="30" cy="30" r="25" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6"/><circle cx="30" cy="30" r="25" fill="none" stroke="var(--blue)" stroke-width="6" stroke-dasharray="157" stroke-dashoffset="47" stroke-linecap="round"/></svg><div class="mac-text" style="color:var(--blue)">70%</div></div>
+          <div style="font-size:11px;color:var(--text2)">Protein</div><div style="font-size:12px;font-weight:800">140g</div>
+        </div>
+        <div class="macro-item">
+          <div class="mac-ring"><svg viewBox="0 0 60 60" width="64" height="64"><circle cx="30" cy="30" r="25" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6"/><circle cx="30" cy="30" r="25" fill="none" stroke="var(--amber)" stroke-width="6" stroke-dasharray="157" stroke-dashoffset="63" stroke-linecap="round"/></svg><div class="mac-text" style="color:var(--amber)">60%</div></div>
+          <div style="font-size:11px;color:var(--text2)">Carbs</div><div style="font-size:12px;font-weight:800">195g</div>
+        </div>
+        <div class="macro-item">
+          <div class="mac-ring"><svg viewBox="0 0 60 60" width="64" height="64"><circle cx="30" cy="30" r="25" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6"/><circle cx="30" cy="30" r="25" fill="none" stroke="var(--green)" stroke-width="6" stroke-dasharray="157" stroke-dashoffset="94" stroke-linecap="round"/></svg><div class="mac-text" style="color:var(--green)">40%</div></div>
+          <div style="font-size:11px;color:var(--text2)">Fat</div><div style="font-size:12px;font-weight:800">48g</div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">Supplements</div>
+    <div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="suppGrid"></div></div>
+    <div class="sec">Water Intake</div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div><div style="font-size:24px;font-weight:800;color:var(--blue)">2.4<span style="font-size:14px;color:var(--text2)">L</span></div><div style="font-size:11px;color:var(--text2)">of 3L goal</div></div>
+        <button class="btn btn-p" onclick="toast('💧 +250ml logged!','green')" style="padding:8px 14px">+ 250ml</button>
+      </div>
+      <div class="pbar-wrap"><div class="pbar blue" style="width:80%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ACHIEVEMENTS -->
+<div class="screen" id="s-achievements">
+  <div class="header"><h1>Achievements</h1><div class="sub">23 unlocked · 14 remaining</div></div>
+  <div id="achList"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="s-settings">
+  <div class="header"><h1>Settings</h1></div>
+  <div class="sec">Profile</div>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--blue3));display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;flex-shrink:0">A</div>
+      <div><div style="font-size:16px;font-weight:700">Athlete</div><div style="font-size:12px;color:var(--text2)">Level 14 · Iron Beast</div></div>
+    </div>
+    <div class="tog-row"><span style="font-size:14px;font-weight:600">Units</span><div style="display:flex;gap:6px"><button class="btn btn-p" style="padding:5px 14px;font-size:12px">kg</button><button class="btn btn-s" style="padding:5px 14px;font-size:12px">lbs</button></div></div>
+  </div>
+  <div class="sec">Notifications</div>
+  <div class="card">
+    <div class="tog-row"><div><div style="font-size:14px;font-weight:600">Workout Reminder</div><div style="font-size:11px;color:var(--text3)">Daily at 6:00 AM</div></div><label class="toggle"><input type="checkbox" checked><span class="tog-sl"></span></label></div>
+    <div class="tog-row"><div><div style="font-size:14px;font-weight:600">Rest Timer Alert</div><div style="font-size:11px;color:var(--text3)">Sound + vibration</div></div><label class="toggle"><input type="checkbox" checked><span class="tog-sl"></span></label></div>
+    <div class="tog-row"><div><div style="font-size:14px;font-weight:600">Water Reminder</div><div style="font-size:11px;color:var(--text3)">Every 2 hours</div></div><label class="toggle"><input type="checkbox"><span class="tog-sl"></span></label></div>
+    <div class="tog-row"><div><div style="font-size:14px;font-weight:600">Protein Reminder</div><div style="font-size:11px;color:var(--text3)">End of day</div></div><label class="toggle"><input type="checkbox" checked><span class="tog-sl"></span></label></div>
+    <div class="tog-row"><div><div style="font-size:14px;font-weight:600">Progress Photo</div><div style="font-size:11px;color:var(--text3)">Weekly Sunday morning</div></div><label class="toggle"><input type="checkbox" checked><span class="tog-sl"></span></label></div>
+  </div>
+  <div class="sec">Auto-Progression</div>
+  <div class="card">
+    <div class="tog-row"><div><div style="font-size:14px;font-weight:600">Auto-fill Last Week</div><div style="font-size:11px;color:var(--text3)">Weight, reps, RPE, notes</div></div><label class="toggle"><input type="checkbox" checked><span class="tog-sl"></span></label></div>
+    <div class="tog-row"><div><div style="font-size:14px;font-weight:600">Auto Rest Timer</div><div style="font-size:11px;color:var(--text3)">Start after each set</div></div><label class="toggle"><input type="checkbox" checked><span class="tog-sl"></span></label></div>
+  </div>
+  <div class="sec">Data</div>
+  <div class="card">
+    <div class="tog-row"><div style="font-size:14px;font-weight:600">Export CSV</div><div class="badge blue" style="cursor:pointer" onclick="toast('Export started...')">Export</div></div>
+    <div class="tog-row"><div style="font-size:14px;font-weight:600">Backup</div><div class="badge green" onclick="toast('Backup created ✓','green')" style="cursor:pointer">Back up now</div></div>
+    <div class="tog-row"><div style="font-size:14px;font-weight:600">Import</div><div class="badge amber" style="cursor:pointer" onclick="toast('Select a file to import')">Import</div></div>
+  </div>
+  <div class="sec">Lifetime Stats</div>
+  <div class="card" style="margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:18px;font-weight:800;color:var(--blue)">156</div><div style="font-size:10px;color:var(--text3)">Workouts</div></div>
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:18px;font-weight:800;color:var(--blue)">4,680</div><div style="font-size:10px;color:var(--text3)">Sets</div></div>
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:18px;font-weight:800;color:var(--green)">312t</div><div style="font-size:10px;color:var(--text3)">Volume</div></div>
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:18px;font-weight:800;color:var(--amber)">187h</div><div style="font-size:10px;color:var(--text3)">Trained</div></div>
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:18px;font-weight:800;color:var(--purple)">89</div><div style="font-size:10px;color:var(--text3)">PRs</div></div>
+      <div style="background:var(--bg3);border-radius:var(--r2);padding:10px"><div style="font-size:18px;font-weight:800;color:var(--red)">🔥23</div><div style="font-size:10px;color:var(--text3)">Best streak</div></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="nav('home',this)">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Home
+  </button>
+  <button class="nav-btn" onclick="nav('workout',this)">
+    <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M3 12h3m15 0h-3M6 8.5v7M18 8.5v7"/></svg>Workout
+  </button>
+  <button class="nav-btn" onclick="nav('progress',this)">
+    <svg viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>Progress
+  </button>
+  <button class="nav-btn" onclick="nav('achievements',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>Awards
+  </button>
+  <button class="nav-btn" onclick="nav('settings',this)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings
+  </button>
+</nav>
+
+<div id="floatTimer">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+  <span id="floatTime" style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums">1:30</span>
+  <span style="font-size:11px;color:var(--text3)">rest</span>
+</div>
+
+<div id="toast"></div>
+
+<div class="modal-bg" id="restModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="text-align:center">
+      <div style="font-size:12px;color:var(--text3);font-weight:700;letter-spacing:0.8px;margin-bottom:14px">REST TIMER</div>
+      <div style="position:relative;width:150px;height:150px;margin:0 auto 14px">
+        <svg width="150" height="150" style="position:absolute;top:0;left:0;transform:rotate(-90deg)"><circle cx="75" cy="75" r="65" fill="none" stroke="var(--bg3)" stroke-width="8"/><circle id="restCircle" cx="75" cy="75" r="65" fill="none" stroke="var(--blue)" stroke-width="8" stroke-linecap="round" stroke-dasharray="408" stroke-dashoffset="0" style="transition:stroke-dashoffset 1s linear,stroke 0.3s"/></svg>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:800;font-variant-numeric:tabular-nums" id="restDisplay">1:30</div>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:20px">Next set when you're ready</div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-bottom:12px">
+        <button class="btn btn-s" onclick="adjRest(-15)">–15s</button>
+        <button class="btn btn-p" id="restBtn" onclick="toggleRest()" style="min-width:90px">Pause</button>
+        <button class="btn btn-s" onclick="adjRest(15)">+15s</button>
+      </div>
+      <button class="btn btn-s btn-full" onclick="skipRest()">Skip Rest</button>
+    </div>
+  </div>
+</div>
+
+<div id="prModal">
+  <div class="pr-card">
+    <div style="font-size:52px;margin-bottom:10px">🏆</div>
+    <div style="font-size:24px;font-weight:800;color:var(--amber);letter-spacing:-0.5px">New PR!</div>
+    <div style="font-size:14px;color:var(--text2);margin:8px 0 16px" id="prText">Pull Ups · 12 reps</div>
+    <div style="display:inline-block;background:linear-gradient(135deg,#92400e,#f59e0b);color:#fff;padding:4px 16px;border-radius:6px;font-size:12px;font-weight:800;margin-bottom:16px">Personal Record 🎉</div><br>
+    <button class="btn btn-s" onclick="closePr()">Let's go!</button>
+  </div>
+</div>
+
+<script>
+const PROG=[
+  {day:1,name:'Back Width + Biceps',emoji:'💪',exs:[
+    {name:'Pull Ups',muscle:'Back',e:'🔝',sets:[{w:'BW',r:10},{w:'BW',r:8},{w:'BW',r:8}],prev:'BW×10',pr:'12 reps'},
+    {name:'Wide Lat Pulldown',muscle:'Lats',e:'🔽',sets:[{w:60,r:12},{w:60,r:10},{w:55,r:12}],prev:'60×12',pr:'65kg×10'},
+    {name:'Chest Supported Row',muscle:'Mid Back',e:'↔️',sets:[{w:50,r:12},{w:50,r:12},{w:45,r:15}],prev:'50×12',pr:'55kg×10'},
+    {name:'Single Arm Lat PD',muscle:'Lats',e:'💪',sets:[{w:25,r:12},{w:25,r:12},{w:22,r:15}],prev:'25×12',pr:'30kg×10'},
+    {name:'Straight Arm PD',muscle:'Lats',e:'⬇️',sets:[{w:20,r:15},{w:20,r:15}],prev:'20×15',pr:'25kg×12'},
+    {name:'Incline Curl',muscle:'Biceps',e:'💪',sets:[{w:14,r:12},{w:14,r:12},{w:12,r:15}],prev:'14×12',pr:'16kg×10'},
+    {name:'Hammer Curl',muscle:'Biceps',e:'🔨',sets:[{w:16,r:12},{w:16,r:12},{w:14,r:15}],prev:'16×12',pr:'18kg×10'},
+  ]},
+  {day:2,name:'Chest + Triceps',emoji:'💎',exs:[
+    {name:'Incline Bench Press',muscle:'Upper Chest',e:'⬆️',sets:[{w:70,r:10},{w:70,r:8},{w:65,r:10}],prev:'70×10',pr:'80kg×8'},
+    {name:'Incline DB Press',muscle:'Chest',e:'🏋️',sets:[{w:32,r:12},{w:32,r:10},{w:28,r:12}],prev:'32×12',pr:'36kg×10'},
+    {name:'Machine Chest Press',muscle:'Chest',e:'🔧',sets:[{w:80,r:12},{w:80,r:10},{w:70,r:12}],prev:'80×12',pr:'90kg×8'},
+    {name:'Cable Fly',muscle:'Chest',e:'🦋',sets:[{w:15,r:15},{w:15,r:15},{w:12,r:15}],prev:'15×15',pr:'18kg×12'},
+    {name:'Skull Crushers',muscle:'Triceps',e:'💀',sets:[{w:40,r:12},{w:40,r:10},{w:35,r:12}],prev:'40×12',pr:'45kg×10'},
+    {name:'Tricep Pushdown',muscle:'Triceps',e:'⬇️',sets:[{w:35,r:15},{w:35,r:15},{w:30,r:15}],prev:'35×15',pr:'40kg×12'},
+  ]},
+  {day:3,name:'Legs + Abs',emoji:'🦵',exs:[
+    {name:'Barbell Squat',muscle:'Quads',e:'🏋️',sets:[{w:100,r:8},{w:100,r:8},{w:90,r:10}],prev:'100×8',pr:'110kg×5'},
+    {name:'Romanian Deadlift',muscle:'Hamstrings',e:'💪',sets:[{w:80,r:10},{w:80,r:10},{w:75,r:12}],prev:'80×10',pr:'90kg×8'},
+    {name:'Leg Press',muscle:'Quads',e:'🦵',sets:[{w:160,r:12},{w:160,r:10},{w:140,r:15}],prev:'160×12',pr:'180kg×10'},
+    {name:'Leg Curl',muscle:'Hamstrings',e:'🔄',sets:[{w:50,r:12},{w:50,r:12},{w:45,r:15}],prev:'50×12',pr:'60kg×10'},
+    {name:'Standing Calf Raise',muscle:'Calves',e:'👟',sets:[{w:80,r:15},{w:80,r:15},{w:70,r:20}],prev:'80×15',pr:'100kg×12'},
+    {name:'Hanging Leg Raise',muscle:'Abs',e:'⬆️',sets:[{w:'BW',r:15},{w:'BW',r:12},{w:'BW',r:10}],prev:'BW×15',pr:'20 reps'},
+    {name:'Cable Crunch',muscle:'Abs',e:'🔽',sets:[{w:30,r:15},{w:30,r:15}],prev:'30×15',pr:'40kg×12'},
+  ]},
+  {day:4,name:'Shoulders + Arms',emoji:'🏔️',exs:[
+    {name:'Seated DB Press',muscle:'Shoulders',e:'🏋️',sets:[{w:28,r:10},{w:28,r:8},{w:24,r:12}],prev:'28×10',pr:'32kg×8'},
+    {name:'DB Lateral Raise',muscle:'Side Delts',e:'✈️',sets:[{w:14,r:15},{w:14,r:12},{w:12,r:15}],prev:'14×15',pr:'16kg×12'},
+    {name:'Cable Lateral Raise',muscle:'Side Delts',e:'📐',sets:[{w:8,r:15},{w:8,r:15},{w:6,r:20}],prev:'8×15',pr:'10kg×12'},
+    {name:'Rear Delt Fly',muscle:'Rear Delts',e:'🦅',sets:[{w:12,r:15},{w:12,r:15},{w:10,r:20}],prev:'12×15',pr:'14kg×12'},
+    {name:'Face Pull',muscle:'Rear Delts',e:'😤',sets:[{w:20,r:15},{w:20,r:15},{w:18,r:20}],prev:'20×15',pr:'25kg×12'},
+    {name:'EZ Bar Curl',muscle:'Biceps',e:'〰️',sets:[{w:40,r:12},{w:40,r:10},{w:35,r:12}],prev:'40×12',pr:'50kg×8'},
+    {name:'Tricep Pushdown',muscle:'Triceps',e:'⬇️',sets:[{w:35,r:15},{w:35,r:15},{w:30,r:15}],prev:'35×15',pr:'40kg×12'},
+  ]},
+  {day:5,name:'Back Thickness + Chest',emoji:'🔱',exs:[
+    {name:'T-Bar Row',muscle:'Mid Back',e:'🔱',sets:[{w:70,r:10},{w:70,r:8},{w:65,r:10}],prev:'70×10',pr:'80kg×8'},
+    {name:'Barbell Row',muscle:'Back',e:'〽️',sets:[{w:80,r:8},{w:80,r:8},{w:75,r:10}],prev:'80×8',pr:'90kg×6'},
+    {name:'Cable Row',muscle:'Mid Back',e:'↔️',sets:[{w:65,r:12},{w:65,r:12},{w:60,r:15}],prev:'65×12',pr:'75kg×10'},
+    {name:'Incline Machine Press',muscle:'Upper Chest',e:'🔧',sets:[{w:90,r:12},{w:90,r:10},{w:80,r:12}],prev:'90×12',pr:'100kg×8'},
+    {name:'Cable Fly',muscle:'Chest',e:'🦋',sets:[{w:15,r:15},{w:15,r:15},{w:12,r:20}],prev:'15×15',pr:'18kg×12'},
+  ]},
+  {day:6,name:'Legs + Shoulders',emoji:'⚡',exs:[
+    {name:'Hack Squat',muscle:'Quads',e:'🔩',sets:[{w:120,r:10},{w:120,r:8},{w:100,r:12}],prev:'120×10',pr:'140kg×8'},
+    {name:'Bulgarian Split Squat',muscle:'Quads',e:'🦵',sets:[{w:30,r:10},{w:30,r:10},{w:26,r:12}],prev:'30×10',pr:'34kg×8'},
+    {name:'Leg Curl',muscle:'Hamstrings',e:'🔄',sets:[{w:50,r:12},{w:50,r:12},{w:45,r:15}],prev:'50×12',pr:'60kg×10'},
+    {name:'Lateral Raise Giant Set',muscle:'Side Delts',e:'💫',sets:[{w:12,r:20},{w:10,r:20},{w:8,r:20}],prev:'12×20',pr:'14kg×15'},
+    {name:'Rear Delt Cable Fly',muscle:'Rear Delts',e:'🦅',sets:[{w:10,r:15},{w:10,r:15},{w:8,r:20}],prev:'10×15',pr:'12kg×12'},
+  ]},
+];
+
+const MUSCLES=[
+  {name:'Chest',pct:78,c:'green'},{name:'Back',pct:55,c:'amber'},{name:'Shoulders',pct:42,c:'red'},
+  {name:'Biceps',pct:85,c:'green'},{name:'Triceps',pct:80,c:'green'},{name:'Legs',pct:30,c:'red'},{name:'Core',pct:90,c:'green'},
+];
+const INSIGHTS=[
+  {t:'green',icon:'📈',txt:'Pull-up strength is up 15% this month. Keep the momentum.'},
+  {t:'blue',icon:'💧',txt:'You\'re at 80% hydration. Drink 600ml more to hit your 3L goal today.'},
+  {t:'amber',icon:'⚠️',txt:'Leg volume dropped 20% vs last week. Consider adding a set or two.'},
+  {t:'red',icon:'😴',txt:'Recovery score is 42%. Prioritize sleep before your next leg session.'},
+];
+const ACHS=[
+  {e:'🌟',name:'First Workout',desc:'Complete your very first workout',t:'gold',u:true},
+  {e:'💪',name:'10 Workouts',desc:'Complete 10 total workouts',t:'blue',u:true},
+  {e:'🔥',name:'Week Warrior',desc:'7 consecutive workout days',t:'gold',u:true},
+  {e:'🏆',name:'50 Workouts',desc:'Complete 50 workouts',t:'gold',u:true},
+  {e:'💯',name:'Century Club',desc:'Complete 100 workouts',t:'purple',u:true},
+  {e:'📅',name:'Never Skip Monday',desc:'Train every Monday for a month',t:'blue',u:true},
+  {e:'🦵',name:'Leg Day Survivor',desc:'Complete 20 leg sessions',t:'green',u:true},
+  {e:'🔙',name:'Back Monster',desc:'Pull 5,000kg total in rows',t:'purple',u:true},
+  {e:'🎯',name:'100kg Squat',desc:'Squat 100kg for reps',t:'green',u:true},
+  {e:'⬆️',name:'10 Pull-Ups',desc:'10 consecutive bodyweight pull-ups',t:'blue',u:true},
+  {e:'⏱️',name:'Hour of Iron',desc:'Train for 60+ minutes straight',t:'green',u:true},
+  {e:'💎',name:'Chest King',desc:'Bench press over 100kg',t:'gold',u:false},
+  {e:'📦',name:'5000kg Session',desc:'Lift 5,000kg in one session',t:'amber',u:false},
+  {e:'🏅',name:'Consistency Beast',desc:'Work out 25 times in a month',t:'purple',u:false},
+  {e:'📸',name:'Progress Tracker',desc:'Log 12 weeks of photos',t:'blue',u:false},
+  {e:'🧬',name:'Iron Will',desc:'365 day training streak',t:'gold',u:false},
+];
+const PRS=[
+  {name:'Pull Ups',val:'12 reps',date:'Jun 15'},
+  {name:'Barbell Squat',val:'110kg × 5',date:'Jun 10'},
+  {name:'Incline Bench',val:'80kg × 8',date:'Jun 8'},
+  {name:'T-Bar Row',val:'80kg × 8',date:'Jun 5'},
+  {name:'Romanian DL',val:'90kg × 8',date:'May 28'},
+  {name:'Leg Press',val:'180kg × 10',date:'May 25'},
+  {name:'EZ Bar Curl',val:'50kg × 8',date:'May 20'},
+  {name:'Hack Squat',val:'140kg × 8',date:'May 15'},
+];
+const SUPPS=[
+  {e:'💊',name:'Creatine',dose:'5g',done:false},
+  {e:'⚡',name:'Pre-workout',dose:'1 scoop',done:false},
+  {e:'💧',name:'Water',dose:'2.4 / 3L',done:true},
+  {e:'🔋',name:'Electrolytes',dose:'1 packet',done:false},
+];
+
+let activeDay=0,wkStarted=false,wkTimerId=null,wkSeconds=0;
+let restTime=90,restMax=90,restRunning=false,restId=null;
+let openExs=new Set(),doneSets={};
+
+function nav(s,btn){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('s-'+s).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('app').scrollTop=0;
+}
+
+function switchPTab(btn,id){
+  document.querySelectorAll('#s-progress .tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  ['pt-analytics','pt-calendar','pt-body','pt-prs','pt-streak','pt-nutrition'].forEach(t=>{
+    document.getElementById(t).style.display=t===id?'':'none';
+  });
+}
+
+let _toastId;
+function toast(msg,color){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.style.background=color==='green'?'rgba(34,197,94,0.18)':color==='red'?'rgba(239,68,68,0.18)':'var(--bg3)';
+  el.style.borderColor=color==='green'?'rgba(34,197,94,0.3)':color==='red'?'rgba(239,68,68,0.3)':'var(--glassborder)';
+  el.style.color=color==='green'?'#4ade80':color==='red'?'#f87171':'var(--text)';
+  el.style.opacity='1';el.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(_toastId);
+  _toastId=setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(-50%) translateY(20px)';},2400);
+}
+
+function buildDayTabs(){
+  const el=document.getElementById('dayTabs');
+  el.innerHTML='';
+  PROG.forEach((d,i)=>{
+    const t=document.createElement('div');
+    t.className='tab'+(i===activeDay?' active':'');
+    t.textContent='Day '+d.day;
+    t.onclick=()=>selectDay(i);
+    el.appendChild(t);
+  });
+}
+
+function selectDay(i){
+  activeDay=i;
+  buildDayTabs();
+  buildExList();
+  document.getElementById('wkName').textContent=PROG[i].name;
+  document.getElementById('wkDayNum').textContent=PROG[i].day;
+}
+
+function buildExList(){
+  const d=PROG[activeDay];
+  const el=document.getElementById('exList');
+  el.innerHTML='';
+  d.exs.forEach((ex,ei)=>{
+    const card=document.createElement('div');
+    card.className='ex-card';
+    const open=openExs.has(activeDay+'-'+ei);
+    let sHtml='';
+    ex.sets.forEach((s,si)=>{
+      const key=activeDay+'-'+ei+'-'+si;
+      const done=doneSets[key];
+      sHtml+=`<div class="set-row${done?' done-row':''}" id="sr-${key}">
+        <div class="set-num">${si+1}</div>
+        <input class="set-in" type="text" inputmode="decimal" value="${s.w}" placeholder="kg" id="w-${key}">
+        <input class="set-in" type="text" inputmode="numeric" value="${s.r}" placeholder="reps" id="r-${key}">
+        <div class="set-chk${done?' done':''}" onclick="doneSet('${key}',${ei})">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${done?'#fff':'rgba(255,255,255,0.25)'}" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg>
+        </div>
+      </div>`;
+    });
+    card.innerHTML=`
+      <div class="ex-hdr" onclick="toggleEx(${activeDay},${ei})">
+        <div class="ex-ico">${ex.e}</div>
+        <div style="flex:1">
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-meta">${ex.muscle} · ${ex.sets.length} sets · PR: ${ex.pr}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="pr-badge">PR</span>
+          <svg id="chev-${activeDay}-${ei}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2.5" style="transform:rotate(${open?180:0}deg);transition:transform 0.2s;flex-shrink:0"><polyline points="6,9 12,15 18,9"/></svg>
+        </div>
+      </div>
+      <div class="ex-body${open?' open':''}" id="body-${activeDay}-${ei}">
+        <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">
+          <span class="tag">🎯 ${ex.muscle}</span>
+          <span class="tag">📊 Last: ${ex.prev}</span>
+          <span class="tag">🏆 PR: ${ex.pr}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:28px 1fr 1fr 38px;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--glassborder);margin-bottom:2px">
+          <div style="font-size:10px;color:var(--text3);text-align:center">SET</div>
+          <div style="font-size:10px;color:var(--text3);text-align:center">WEIGHT</div>
+          <div style="font-size:10px;color:var(--text3);text-align:center">REPS</div>
+          <div style="font-size:10px;color:var(--text3);text-align:center">✓</div>
+        </div>
+        ${sHtml}
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-s" style="flex:1;font-size:12px" onclick="addSet(${activeDay},${ei})">+ Add Set</button>
+          <button class="btn btn-s" style="flex:1;font-size:12px" onclick="openRest()">⏱ Rest Timer</button>
+        </div>
+      </div>`;
+    el.appendChild(card);
+  });
+}
+
+function toggleEx(di,ei){
+  const key=di+'-'+ei;
+  const body=document.getElementById('body-'+di+'-'+ei);
+  const chev=document.getElementById('chev-'+di+'-'+ei);
+  if(openExs.has(key)){openExs.delete(key);body.classList.remove('open');chev.style.transform='rotate(0deg)';}
+  else{openExs.add(key);body.classList.add('open');chev.style.transform='rotate(180deg)';}
+}
+
+function doneSet(key,ei){
+  doneSets[key]=!doneSets[key];
+  const row=document.getElementById('sr-'+key);
+  const chk=row.querySelector('.set-chk');
+  const done=doneSets[key];
+  chk.className='set-chk'+(done?' done':'');
+  chk.querySelector('svg').setAttribute('stroke',done?'#fff':'rgba(255,255,255,0.25)');
+  row.classList.toggle('done-row',done);
+  if(done){openRest();if(Math.random()<0.12)setTimeout(()=>showPr(PROG[activeDay].exs[ei].name),700);}
+}
+
+function addSet(di,ei){
+  const ex=PROG[di].exs[ei];
+  ex.sets.push({...ex.sets[ex.sets.length-1]});
+  openExs.add(di+'-'+ei);
+  buildExList();
+  toast('Set added');
+}
+
+function openRest(){
+  restTime=90;restMax=90;restRunning=true;
+  document.getElementById('restModal').classList.add('open');
+  document.getElementById('floatTimer').classList.add('show');
+  updateRest();
+  clearInterval(restId);
+  restId=setInterval(()=>{
+    if(!restRunning)return;
+    restTime--;updateRest();
+    if(restTime<=0){clearInterval(restId);document.getElementById('restModal').classList.remove('open');document.getElementById('floatTimer').classList.remove('show');toast('Rest done — go! 💪','green');}
+  },1000);
+}
+
+function updateRest(){
+  const m=Math.floor(restTime/60),s=restTime%60;
+  const str=m+':'+(s<10?'0':'')+s;
+  document.getElementById('restDisplay').textContent=str;
+  document.getElementById('floatTime').textContent=str;
+  const circ=document.getElementById('restCircle');
+  circ.style.strokeDashoffset=408*(1-restTime/restMax);
+  circ.style.stroke=restTime<10?'var(--red)':restTime<30?'var(--amber)':'var(--blue)';
+}
+
+function toggleRest(){restRunning=!restRunning;document.getElementById('restBtn').textContent=restRunning?'Pause':'Resume';}
+function adjRest(d){restTime=Math.max(5,Math.min(600,restTime+d));restMax=Math.max(restMax,restTime);updateRest();}
+function skipRest(){clearInterval(restId);document.getElementById('restModal').classList.remove('open');document.getElementById('floatTimer').classList.remove('show');toast('Rest skipped','amber');}
+
+function goWorkout(){
+  nav('workout',document.querySelectorAll('.nav-btn')[1]);
+  if(!wkStarted){wkStarted=true;wkTimerId=setInterval(()=>{wkSeconds++;updateWkTimer();},1000);}
+  toast('Workout started! 💪','green');
+}
+
+function updateWkTimer(){
+  const m=Math.floor(wkSeconds/60),s=wkSeconds%60;
+  const el=document.getElementById('wkTimer');
+  if(el)el.textContent=m+':'+(s<10?'0':'')+s;
+}
+
+function finishWorkout(){
+  clearInterval(wkTimerId);clearInterval(restId);wkStarted=false;wkSeconds=0;
+  document.getElementById('restModal').classList.remove('open');
+  document.getElementById('floatTimer').classList.remove('show');
+  const done=Object.values(doneSets).filter(Boolean).length;
+  confetti();
+  toast('Session complete! '+done+' sets crushed 🎉','green');
+  setTimeout(()=>nav('home',document.querySelectorAll('.nav-btn')[0]),800);
+}
+
+function showPr(name){
+  document.getElementById('prText').textContent=name+' · New Record! 🔥';
+  document.getElementById('prModal').style.display='flex';
+}
+function closePr(){document.getElementById('prModal').style.display='none';}
+
+function confetti(){
+  const cols=['#3b82f6','#f59e0b','#22c55e','#a855f7','#ec4899','#60a5fa'];
+  for(let i=0;i<28;i++){
+    const c=document.createElement('div');
+    c.className='cpiece';
+    c.style.cssText=`left:${10+Math.random()*80}%;top:${35+Math.random()*45}%;background:${cols[~~(Math.random()*cols.length)]};animation-duration:${0.7+Math.random()*0.6}s;animation-delay:${Math.random()*0.3}s`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),1800);
+  }
+}
+
+function buildRecovery(el){
+  if(!el)return;
+  el.innerHTML='';
+  MUSCLES.forEach(m=>{
+    const col=m.c==='green'?'var(--green)':m.c==='amber'?'var(--amber)':'var(--red)';
+    const label=m.c==='green'?'Ready':m.c==='amber'?'Partial':'Fatigued';
+    el.innerHTML+=`<div class="mbar-row"><div class="mbar-name">${m.name}</div><div style="flex:1"><div class="pbar-wrap"><div class="pbar ${m.c}" style="width:${m.pct}%"></div></div></div><div class="mbar-pct" style="color:${col}">${label}</div></div>`;
+  });
+}
+
+function buildInsights(el){
+  if(!el)return;
+  el.innerHTML='';
+  INSIGHTS.forEach(ins=>{
+    el.innerHTML+=`<div class="insight ${ins.t}"><div style="font-size:18px">${ins.icon}</div><div style="font-size:13px;line-height:1.5">${ins.txt}</div></div>`;
+  });
+}
+
+function buildAchs(){
+  const el=document.getElementById('achList');
+  if(!el)return;
+  el.innerHTML='';
+  const u=ACHS.filter(a=>a.u),l=ACHS.filter(a=>!a.u);
+  el.innerHTML+=`<div class="sec">${u.length} Unlocked</div>`;
+  u.forEach(a=>{
+    el.innerHTML+=`<div class="ach"><div class="ach-ico ${a.t}">${a.e}</div><div style="flex:1"><div style="font-size:14px;font-weight:700">${a.name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${a.desc}</div></div><div class="badge green">✓</div></div>`;
+  });
+  el.innerHTML+=`<div class="sec">${l.length} Locked</div>`;
+  l.forEach(a=>{
+    el.innerHTML+=`<div class="ach locked"><div class="ach-ico ${a.t}">${a.e}</div><div style="flex:1"><div style="font-size:14px;font-weight:700">${a.name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${a.desc}</div></div><div class="badge" style="background:var(--bg3);color:var(--text3)">🔒</div></div>`;
+  });
+}
+
+function buildPRs(){
+  const el=document.getElementById('prList');
+  if(!el)return;
+  el.innerHTML='';
+  PRS.forEach(pr=>{
+    el.innerHTML+=`<div class="ach"><div style="width:44px;height:44px;border-radius:var(--r2);background:rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🏆</div><div style="flex:1"><div style="font-size:14px;font-weight:700">${pr.name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${pr.date}</div></div><div class="pr-badge">${pr.val}</div></div>`;
+  });
+}
+
+function buildCal(){
+  const el=document.getElementById('calGrid');
+  if(!el)return;
+  el.innerHTML='';
+  const types=['rest','workout','workout','pr','workout','rest','rest','workout','workout','missed','workout','workout','pr','rest','workout','workout','workout','rest','workout','workout','rest','workout','workout','workout','workout','rest','workout','today','rest','rest'];
+  for(let i=0;i<30;i++){
+    const d=document.createElement('div');
+    d.className='cal-day '+(types[i]||'rest');
+    d.textContent=i+1;
+    el.appendChild(d);
+  }
+}
+
+function buildHeatmap(){
+  const el=document.getElementById('heatmapEl');
+  if(!el)return;
+  el.innerHTML='';
+  for(let i=0;i<126;i++){
+    const d=document.createElement('div');
+    const l=i>108?0:Math.random()<0.3?0:[1,2,3,4][~~(Math.random()*4)];
+    d.className='hc'+(l?' l'+l:'');
+    el.appendChild(d);
+  }
+}
+
+function buildSupps(){
+  const el=document.getElementById('suppGrid');
+  if(!el)return;
+  el.innerHTML='';
+  SUPPS.forEach((s,i)=>{
+    el.innerHTML+=`<div onclick="toggleSupp(${i})" style="background:${s.done?'rgba(34,197,94,0.1)':'var(--bg3)'};border:1px solid ${s.done?'rgba(34,197,94,0.25)':'transparent'};border-radius:var(--r2);padding:10px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.15s">
+      <span style="font-size:18px">${s.e}</span>
+      <div><div style="font-size:12px;font-weight:700;color:${s.done?'var(--green)':'var(--text)'}">${s.name}${s.done?' ✓':''}</div><div style="font-size:10px;color:var(--text3)">${s.dose}</div></div>
+    </div>`;
+  });
+}
+function toggleSupp(i){SUPPS[i].done=!SUPPS[i].done;buildSupps();if(SUPPS[i].done)toast(SUPPS[i].name+' logged ✓','green');}
+
+function initGreeting(){
+  const h=new Date().getHours();
+  const g=document.getElementById('greeting');
+  if(g)g.textContent=h<12?'Good morning 👋':h<17?'Good afternoon 👋':'Good evening 👋';
+  const de=document.getElementById('todayDate');
+  if(de)de.textContent=new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+}
+
+initGreeting();
+buildRecovery(document.getElementById('homeRecovery'));
+buildInsights(document.getElementById('homeInsights'));
+buildDayTabs();
+buildExList();
+buildAchs();
+buildPRs();
+buildCal();
+buildHeatmap();
+buildSupps();
+</script>
+</body>
+</html>
