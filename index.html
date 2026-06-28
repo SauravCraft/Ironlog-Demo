@@ -16,7 +16,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-system,'SF Pro Display','Inter',sans-serif;color:var(--text)}
-#app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative;overflow:hidden}
+#app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;position:relative;overflow:hidden;padding-top:env(safe-area-inset-top,0px)}
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:90px;-webkit-overflow-scrolling:touch}
 .screen::-webkit-scrollbar{display:none}
 
@@ -61,7 +61,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 .badge-red{background:var(--red-dim);color:var(--red)}
 
 /* HEADERS */
-.screen-header{padding:8px 16px 12px;display:flex;justify-content:space-between;align-items:center}
+.screen-header{padding:20px 16px 12px;display:flex;justify-content:space-between;align-items:center}
 .screen-title{font-size:26px;font-weight:800;letter-spacing:-.8px}
 .back-link{color:var(--blue);font-size:15px;cursor:pointer;padding:6px 0;display:flex;align-items:center;gap:2px}
 
@@ -121,7 +121,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 
 /* ======== HOME ======== */
 #home-screen{display:none}
-.home-header{padding:10px 16px 14px;display:flex;justify-content:space-between;align-items:flex-start}
+.home-header{padding:20px 16px 14px;display:flex;justify-content:space-between;align-items:flex-start}
 .greet-sub{font-size:14px;color:var(--muted);margin-bottom:2px}
 .greet-name{font-size:30px;font-weight:800;letter-spacing:-.8px}
 .avatar{width:44px;height:44px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;cursor:pointer;flex-shrink:0;box-shadow:0 0 0 2px #222}
@@ -152,7 +152,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 
 /* ======== WORKOUT ======== */
 #workout-screen{display:none}
-.wo-header{padding:6px 16px 10px;display:flex;align-items:center;justify-content:space-between}
+.wo-header{padding:20px 16px 10px;display:flex;align-items:center;justify-content:space-between}
 .wo-center{text-align:center}
 .wo-name{font-size:15px;font-weight:700}
 .wo-timer{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -436,7 +436,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
   <div style="height:80px"></div>
   <div class="finish-float" id="finish-float">
     <button class="btn btn-primary" onclick="finishWorkout()">Finish Workout</button>
-    <div class="timer-fab" onclick="openRest()">⏱</div>
   </div>
 </div>
 
@@ -463,42 +462,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
   <div id="ex-result-list"></div>
 </div>
 
-<!-- REST TIMER -->
-<div id="rest-screen" class="screen">
-  <div class="screen-header">
-    <div class="back-link" onclick="closeRest()">‹ Back</div>
-    <div class="screen-title" style="font-size:19px">Rest Timer</div>
-    <div style="font-size:22px;cursor:pointer" onclick="cycleRestTime()">⚙️</div>
-  </div>
-  <div class="rest-body">
-    <div class="ring-wrap">
-      <svg width="230" height="230" viewBox="0 0 230 230">
-        <circle class="ring-bg" cx="115" cy="115" r="98"/>
-        <circle class="ring-fg" id="rest-ring" cx="115" cy="115" r="98" stroke-dasharray="616" stroke-dashoffset="0"/>
-      </svg>
-      <div class="ring-center">
-        <div class="ring-time" id="rest-time-disp">01:30</div>
-        <div class="ring-label">Rest Time</div>
-      </div>
-    </div>
-    <div class="rec-pill">⚡ Recommended: <span id="rest-rec-lbl">90</span>s</div>
-    <div class="t-ctrl">
-      <div class="t-btn" onclick="skipRest()"><div class="t-circle">⏭</div><div class="t-label">Skip</div></div>
-      <div class="t-btn" onclick="togglePause()" id="pause-wrap"><div class="t-circle primary" id="pause-icon">⏸</div><div class="t-label" id="pause-lbl">Pause</div></div>
-      <div class="t-btn" onclick="addRest(30)"><div class="t-circle">+30</div><div class="t-label">+30s</div></div>
-    </div>
-    <div class="rest-info-row">
-      <div class="rest-info-card card">
-        <div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Next Up</div>
-        <div style="font-size:15px;font-weight:700" id="rest-next">—</div>
-      </div>
-      <div class="rest-info-card card">
-        <div style="font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Last Set</div>
-        <div style="font-size:15px;font-weight:700" id="rest-last-set">—</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- PROGRESS -->
 <div id="progress-screen" class="screen">
@@ -702,14 +665,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 let DB = { workouts:[], prs:{}, body:{}, settings:{units:'KG'} };
 let AW = null; // active workout
 let woTimer = null, woSec = 0;
-let restTimer = null, restLeft = 0, restTotal = 90, restPaused = false;
 let calDate = new Date();
 let exCat = 'All';
 let plateWeights = [];
 let barWeight = 20;
 let chatHistory = [];
-
-const CIRC = 2 * Math.PI * 98; // 616
 
 const EX_DB = [
   {n:'Bench Press',c:'Chest',i:'🏋️',m:'Pectorals'},
@@ -789,9 +749,9 @@ function load(){ try{const d=localStorage.getItem('il_v3');if(d)DB=JSON.parse(d)
 function save(){ try{localStorage.setItem('il_v3',JSON.stringify(DB));}catch(e){} }
 
 // ===== NAV =====
-const ALL_SCREENS=['home','workout','addex','rest','progress','history','profile','platecalc','aicoach','bodystats','complete'];
+const ALL_SCREENS=['home','workout','addex','progress','history','profile','platecalc','aicoach','bodystats','complete'];
 const NAV_SCREENS=['home','progress','history','profile'];
-const NO_NAV=['workout','rest','complete'];
+const NO_NAV=['workout','complete'];
 let screenStack=[];
 
 function navTo(s){
@@ -957,7 +917,6 @@ function toggleSet(ei,si){
   if(s.done){
     checkPR(AW.exercises[ei].name,s);
     const lastSet=si===AW.exercises[ei].sets.length-1;
-    if(lastSet) openRest(AW.exercises[ei].name,`${s.w||'?'}kg × ${s.r||'?'}`);
   }
   renderActive();
 }
@@ -1058,41 +1017,6 @@ function addExToWorkout(name,cat){
   AW.exercises.push({name,cat,sets:[{w:'',r:'',done:false}],newPR:false});
   showToast(name+' added ✓');
   navTo('workout'); renderActive();
-}
-
-// ===== REST TIMER =====
-function openRest(nextEx,lastSet=''){
-  restTotal=90; restLeft=90; restPaused=false;
-  clearInterval(restTimer);
-  document.getElementById('rest-next').textContent=nextEx||AW?.exercises[0]?.name||'—';
-  document.getElementById('rest-last-set').textContent=lastSet||'—';
-  document.getElementById('rest-rec-lbl').textContent=90;
-  document.getElementById('pause-icon').textContent='⏸';
-  document.getElementById('pause-lbl').textContent='Pause';
-  updateRestRing();
-  restTimer=setInterval(()=>{ if(!restPaused){restLeft--;updateRestRing();if(restLeft<=0){clearInterval(restTimer);showToast('✅ Rest done!');closeRest();}} },1000);
-  navTo('rest');
-}
-
-function updateRestRing(){
-  const m=Math.floor(restLeft/60),s=restLeft%60;
-  document.getElementById('rest-time-disp').textContent=m+':'+String(s).padStart(2,'0');
-  const offset=CIRC*(1-restLeft/restTotal);
-  document.getElementById('rest-ring').style.strokeDashoffset=offset;
-}
-
-function togglePause(){ restPaused=!restPaused; document.getElementById('pause-icon').textContent=restPaused?'▶':'⏸'; document.getElementById('pause-lbl').textContent=restPaused?'Resume':'Pause'; }
-function skipRest(){ clearInterval(restTimer); closeRest(); }
-function closeRest(){ clearInterval(restTimer); navTo('workout'); renderActive(); }
-function addRest(s){ restLeft+=s; restTotal+=s; updateRestRing(); }
-function cycleRestTime(){
-  const opts=[60,90,120,180];
-  const cur=opts.indexOf(restTotal);
-  const next=opts[(cur+1)%opts.length];
-  restTotal=next; restLeft=next;
-  document.getElementById('rest-rec-lbl').textContent=next;
-  updateRestRing();
-  showToast('Rest time: '+next+'s');
 }
 
 // ===== PROGRESS =====
