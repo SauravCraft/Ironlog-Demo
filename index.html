@@ -340,7 +340,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 .complete-body{padding:28px 16px 80px;display:flex;flex-direction:column;align-items:center}
 .confetti{font-size:40px;margin-bottom:14px;animation:bounce 1.2s ease infinite}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-.check-circle{width:82px;height:82px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 0 60px var(--blue-glow);margin-bottom:18px;animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+.check-circle{width:82px;height:82px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 0 60px var(--blue-glow);margin-bottom:18px;animation:checkPop .55s cubic-bezier(.34,1.56,.64,1) forwards}
+@keyframes checkPop{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.25) rotate(4deg)}80%{transform:scale(.96)}100%{transform:scale(1);opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.complete-title{animation:fadeUp .4s ease .3s both}
+.complete-sub{animation:fadeUp .4s ease .4s both}
+.complete-grid{animation:fadeUp .4s ease .5s both}
+.pr-reveal{animation:fadeUp .4s ease .6s both}
+.complete-btns{animation:fadeUp .4s ease .7s both}
 @keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
 .complete-title{font-size:28px;font-weight:900;letter-spacing:-.8px;margin-bottom:4px}
 .complete-sub{font-size:15px;color:var(--muted);margin-bottom:26px}
@@ -626,9 +633,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 
 <!-- COMPLETE -->
 <div id="complete-screen" class="screen">
+  <canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10"></canvas>
   <div class="complete-body">
-    <div class="confetti">🎉 🏆 🎊</div>
-    <div class="check-circle">✓</div>
+    <div class="check-circle" id="check-circle">✓</div>
     <div class="complete-title">Workout Complete!</div>
     <div class="complete-sub" id="comp-sub">Great work, Saurav! 💪</div>
     <div class="complete-grid">
@@ -642,7 +649,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
       <div><div style="font-size:15px;font-weight:700;color:var(--amber)">New Personal Records!</div><div style="font-size:12px;color:rgba(245,158,11,.7)" id="pr-list">—</div></div>
     </div>
     <div class="complete-btns">
-      <button class="btn btn-primary" onclick="navTo('progress')">View Progress →</button>
+      <button class="btn btn-primary" onclick="navTo('plan')">View Plan →</button>
       <button class="btn btn-secondary" onclick="navTo('home')">Back to Home</button>
     </div>
   </div>
@@ -854,6 +861,13 @@ function refreshHome(){
   const sd=document.getElementById('h-streak-dots');
   sd.innerHTML='';
   for(let i=0;i<7;i++){const d=document.createElement('div');d.className='s-dot'+(i<streak?' on':'');sd.appendChild(d);}
+  // Rest day protection badge
+  const streakSub=document.querySelector('#h-streak').closest('.stat-card').querySelector('.stat-sub');
+  if(isRestDay()&&streak>0){
+    streakSub.innerHTML='days in a row <span style="display:block;font-size:10px;font-weight:700;color:var(--amber);margin-top:3px">🛡 Rest day · streak safe</span>';
+  } else {
+    streakSub.textContent='days in a row';
+  }
 
   // PR
   const prs=Object.entries(DB.prs);
@@ -998,13 +1012,22 @@ function renderSetRow(ei,si,s,ex){
 
 function setVal(ei,si,field,val){ if(AW)AW.exercises[ei].sets[si][field]=val; }
 
+function haptic(pattern=[40]){ try{ navigator.vibrate?.(pattern); }catch(e){} }
+
 function toggleSet(ei,si){
   if(!AW)return;
   const s=AW.exercises[ei].sets[si];
   s.done=!s.done;
   if(s.done){
+    haptic([30]);
     checkPR(AW.exercises[ei].name,s);
-    const lastSet=si===AW.exercises[ei].sets.length-1;
+    // flash the checkmark row briefly
+    setTimeout(()=>{
+      const rows=document.querySelectorAll(`#exc-${ei} .set-row`);
+      if(rows[si]){ rows[si].style.transition='background .15s'; rows[si].style.background='rgba(34,197,94,.12)'; setTimeout(()=>rows[si].style.background='',350); }
+    },0);
+  } else {
+    haptic([15]);
   }
   renderActive();
 }
@@ -1039,6 +1062,41 @@ function askEndWorkout(){
   if(confirm('End workout without saving?')){ clearInterval(woTimer); AW=null; navTo('home'); }
 }
 
+// ===== CONFETTI =====
+function launchConfetti(){
+  const canvas=document.getElementById('confetti-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  const colors=['#3B82F6','#22C55E','#F59E0B','#EC4899','#8B5CF6','#fff'];
+  const particles=Array.from({length:90},()=>({
+    x:Math.random()*canvas.width, y:-10,
+    w:Math.random()*8+4, h:Math.random()*14+6,
+    rot:Math.random()*360, rotV:(Math.random()-0.5)*8,
+    vx:(Math.random()-0.5)*4, vy:Math.random()*4+3,
+    color:colors[Math.floor(Math.random()*colors.length)],
+    opacity:1
+  }));
+  let frame=0;
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.rot+=p.rotV; p.vy+=0.12;
+      if(frame>90) p.opacity=Math.max(0,p.opacity-0.015);
+      ctx.save(); ctx.globalAlpha=p.opacity;
+      ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color;
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    });
+    frame++;
+    if(frame<200) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+
+// ===== FINISH WORKOUT =====
 function finishWorkout(){
   if(!AW)return;
   clearInterval(woTimer);
@@ -1063,6 +1121,8 @@ function finishWorkout(){
 
   AW=null; navTo('complete');
   document.querySelector('.bottom-nav').style.display='none';
+  haptic([40,30,80,30,120]);
+  setTimeout(launchConfetti, 200);
 }
 
 function checkPR(name,s){
@@ -1322,13 +1382,30 @@ function renderHist(filterDate=null){
   ws.forEach(w=>{
     const ds=fmtDate(w.date);
     if(ds!==cur){html+=`<div class="sec-title" style="margin-top:10px">${ds}</div>`;cur=ds;}
-    html+=`<div class="h-item card" onclick="showWorkoutDetailById('${w.id}')">
-      <div class="h-icon">${woIcon(w.name)}</div>
-      <div class="h-info"><div class="h-name">${w.name}</div><div class="h-meta">${fmtDur(w.duration)} · ${fmtN(calcVol(w))} kg · ${w.exercises?.length||0} exercises</div></div>
-      <div class="row-right">›</div>
+    html+=`<div class="h-item-wrap" id="hw-${w.id}">
+      <div class="h-item card" onclick="showWorkoutDetailById('${w.id}')">
+        <div class="h-icon">${woIcon(w.name)}</div>
+        <div class="h-info"><div class="h-name">${w.name}</div><div class="h-meta">${fmtDur(w.duration)} · ${fmtN(calcVol(w))} kg · ${w.exercises?.length||0} exercises</div></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div onclick="event.stopPropagation();deleteWorkout('${w.id}')" style="width:32px;height:32px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;flex-shrink:0">🗑</div>
+          <div class="row-right">›</div>
+        </div>
+      </div>
     </div>`;
   });
   el.innerHTML=html;
+}
+
+// ===== DELETE WORKOUT =====
+function deleteWorkout(id){
+  if(!confirm('Delete this workout? This cannot be undone.'))return;
+  DB.workouts=DB.workouts.filter(w=>String(w.id)!==String(id));
+  save();
+  document.querySelectorAll('.overlay').forEach(e=>e.remove());
+  refreshHome();
+  renderHist();
+  renderCal();
+  showToast('Workout deleted');
 }
 
 // ===== WORKOUT DETAIL =====
@@ -1390,8 +1467,7 @@ function _showWorkoutDetailSheet(w){
 
   const dateStr=new Date(w.date).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   const content=`
-    <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">
-      <div style="background:var(--blue-dim);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:8px 14px;text-align:center;flex:1">
+    <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap">      <div style="background:var(--blue-dim);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:8px 14px;text-align:center;flex:1">
         <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Duration</div>
         <div style="font-size:18px;font-weight:800;color:var(--blue)">${fmtDur(w.duration)}</div>
       </div>
@@ -1405,7 +1481,10 @@ function _showWorkoutDetailSheet(w){
       </div>
     </div>
     <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Exercises</div>
-    ${exHtml||'<div style="color:var(--muted);font-size:13px;padding:8px 0">No completed sets recorded.</div>'}`;
+    ${exHtml||'<div style="color:var(--muted);font-size:13px;padding:8px 0">No completed sets recorded.</div>'}
+    <div onclick="deleteWorkout('${w.id}')" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:18px;padding:13px;border:1px solid rgba(239,68,68,.25);border-radius:14px;background:rgba(239,68,68,.07);cursor:pointer;color:#EF4444;font-size:14px;font-weight:700">
+      🗑 Delete Workout
+    </div>`;
 
   const sh=mkSheet(`<div><div style="font-size:19px;font-weight:800;letter-spacing:-.4px">${w.name}</div><div style="font-size:12px;color:var(--muted);margin-top:2px;font-weight:500">${dateStr}</div></div>`,content);
   document.body.appendChild(sh);
@@ -1635,10 +1714,21 @@ function calcMonthVol(){ const now=new Date(),m=now.getMonth(),y=now.getFullYear
 function calcStreak(){
   if(!DB.workouts.length)return 0;
   const days=new Set(DB.workouts.map(w=>dKey(new Date(w.date))));
-  let s=0,d=new Date();
-  if(!days.has(dKey(d)))d.setDate(d.getDate()-1);
-  while(days.has(dKey(d))){s++;d.setDate(d.getDate()-1);}
+  let s=0, d=new Date(), restDayUsed=false;
+  // if no workout today, allow starting from yesterday (rest day)
+  if(!days.has(dKey(d))){ d.setDate(d.getDate()-1); }
+  while(true){
+    if(days.has(dKey(d))){ s++; d.setDate(d.getDate()-1); restDayUsed=false; }
+    else if(!restDayUsed){ restDayUsed=true; d.setDate(d.getDate()-1); } // absorb one rest day
+    else break;
+  }
   return s;
+}
+
+function isRestDay(){
+  // true if no workout today but streak is still alive via protection
+  const today=dKey(new Date());
+  return !DB.workouts.some(w=>dKey(new Date(w.date))===today) && calcStreak()>0;
 }
 function getTopEx(){ const p=Object.entries(DB.prs); return p.length?p.reduce((a,b)=>b[1].w>a[1].w?b:a)[0]:null; }
 function dKey(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
