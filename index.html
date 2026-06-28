@@ -729,13 +729,59 @@ const EX_DB = [
 ];
 
 const TEMPLATES = [
-  {n:'Back Width + Triceps',i:'🦺',focus:'Wide lats and bicep peak',ex:['Pull-Up','Wide Lat Pulldown','Chest Supported Row','Single Arm Lat Pulldown','Straight Arm Pulldown','Skull Crusher','Overhead Triceps Extension','Rope Pushdown'],est:'85–95 min'},
-  {n:'Chest + Biceps',i:'🫁',focus:'Upper chest dominance and tricep thickness',ex:['Incline Bench Press','Incline Dumbbell Press','Machine Chest Press','Cable Fly','Preacher Curl','Hammer Curl','Incline Bicep Curl'],est:'80–95 min'},
-  {n:'Legs + Abs',i:'🦵',focus:'Athletic leg proportions and a tight waist',ex:['Squat','Romanian Deadlift','Leg Press','Leg Curl','Calf Raise','Hanging Leg Raise','Cable Crunch','Vacuum Holds'],est:'90–110 min'},
-  {n:'Shoulders + Arms',i:'🎯',focus:'Side delts and arm volume',ex:['Seated Dumbbell Press','Dumbbell Lateral Raise','Cable Lateral Raise','Rear Delt Fly','Face Pull','EZ Curl','Rope Pushdown'],est:'80–95 min'},
-  {n:'Back Thickness + Chest',i:'💪',focus:'3D upper body density',ex:['T-Bar Row','Barbell Row','Seated Cable Row','Incline Dumbbell Press','Cable Fly'],est:'75–90 min'},
-  {n:'Legs + Shoulders',i:'⚡',focus:'Quad sweep and lateral delt frequency',ex:['Front Squat','Bulgarian Split Squat','Leg Curl','Lateral Raise Giant Set','Rear Delt Cable Fly'],est:'85–100 min'},
-  {n:'Custom',i:'✏️',focus:'',ex:[],est:'—'},
+  {n:'Back Width + Triceps',i:'🦺',focus:'Wide lats and bicep peak',est:'85–95 min',ex:[
+    {n:'Pull-Up',            sets:4, reps:'8–12'},
+    {n:'Wide Lat Pulldown',  sets:4, reps:'10–12'},
+    {n:'Chest Supported Row',sets:3, reps:'10'},
+    {n:'Single Arm Lat Pulldown',sets:3,reps:'12'},
+    {n:'Straight Arm Pulldown',  sets:3,reps:'15'},
+    {n:'Skull Crusher',          sets:3,reps:'15'},
+    {n:'Overhead Triceps Extension',sets:3,reps:'12'},
+    {n:'Rope Pushdown',          sets:3,reps:'15'},
+  ]},
+  {n:'Chest + Biceps',i:'🫁',focus:'Upper chest dominance and tricep thickness',est:'80–95 min',ex:[
+    {n:'Incline Bench Press',   sets:4,reps:'6–8'},
+    {n:'Incline Dumbbell Press',sets:4,reps:'8–10'},
+    {n:'Machine Chest Press',   sets:3,reps:'10–12'},
+    {n:'Cable Fly',             sets:3,reps:'12–15'},
+    {n:'Preacher Curl',         sets:3,reps:'15'},
+    {n:'Hammer Curl',           sets:3,reps:'12'},
+    {n:'Incline Bicep Curl',    sets:3,reps:'12'},
+  ]},
+  {n:'Legs + Abs',i:'🦵',focus:'Athletic leg proportions and a tight waist',est:'90–110 min',ex:[
+    {n:'Squat',             sets:4,reps:'6–8'},
+    {n:'Romanian Deadlift', sets:4,reps:'8–10'},
+    {n:'Leg Press',         sets:3,reps:'12'},
+    {n:'Leg Curl',          sets:3,reps:'12–15'},
+    {n:'Calf Raise',        sets:4,reps:'15'},
+    {n:'Hanging Leg Raise', sets:3,reps:'15'},
+    {n:'Cable Crunch',      sets:3,reps:'15'},
+    {n:'Vacuum Holds',      sets:3,reps:'rounds'},
+  ]},
+  {n:'Shoulders + Arms',i:'🎯',focus:'Side delts and arm volume',est:'80–95 min',ex:[
+    {n:'Seated Dumbbell Press',  sets:4,reps:'8–10'},
+    {n:'Dumbbell Lateral Raise', sets:5,reps:'15'},
+    {n:'Cable Lateral Raise',    sets:4,reps:'15–20'},
+    {n:'Rear Delt Fly',          sets:4,reps:'15'},
+    {n:'Face Pull',              sets:3,reps:'15'},
+    {n:'EZ Curl',                sets:3,reps:'10'},
+    {n:'Rope Pushdown',          sets:3,reps:'12'},
+  ]},
+  {n:'Back Thickness + Chest',i:'💪',focus:'3D upper body density',est:'75–90 min',ex:[
+    {n:'T-Bar Row',             sets:4,reps:'8–10'},
+    {n:'Barbell Row',           sets:3,reps:'8–10'},
+    {n:'Seated Cable Row',      sets:3,reps:'12'},
+    {n:'Incline Dumbbell Press',sets:3,reps:'10'},
+    {n:'Cable Fly',             sets:3,reps:'15'},
+  ]},
+  {n:'Legs + Shoulders',i:'⚡',focus:'Quad sweep and lateral delt frequency',est:'85–100 min',ex:[
+    {n:'Front Squat',           sets:4,reps:'10'},
+    {n:'Bulgarian Split Squat', sets:3,reps:'10'},
+    {n:'Leg Curl',              sets:3,reps:'12'},
+    {n:'Lateral Raise Giant Set',sets:5,reps:'rounds'},
+    {n:'Rear Delt Cable Fly',   sets:4,reps:'15–20'},
+  ]},
+  {n:'Custom',i:'✏️',focus:'',est:'—',ex:[]},
 ];
 
 const PLATE_DATA = [
@@ -863,12 +909,33 @@ function showTplSheet(){
   requestAnimationFrame(()=>sh.classList.add('open'));
 }
 
+// Returns the last logged weight for an exercise, or '' if never done
+function getLastWeight(exName){
+  const past=[...DB.workouts].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  for(const w of past){
+    const ex=w.exercises?.find(e=>e.name===exName);
+    if(ex){
+      const doneSets=ex.sets?.filter(s=>s.done&&s.w);
+      if(doneSets?.length) return doneSets[doneSets.length-1].w;
+    }
+  }
+  return '';
+}
+
 function selectTpl(name){
   document.querySelectorAll('.overlay').forEach(e=>e.remove());
   const tmpl=TEMPLATES.find(t=>t.n===name);
-  AW={id:Date.now(),name:name,date:new Date().toISOString(),exercises:tmpl.ex.map(n=>{
-    const ex=EX_DB.find(e=>e.n===n)||{n:name,c:'Other',i:'⚡',m:'General'};
-    return {name:n,cat:ex.c,sets:[{w:'',r:'',done:false}],newPR:false};
+  AW={id:Date.now(),name:name,date:new Date().toISOString(),exercises:tmpl.ex.map(exDef=>{
+    const exName = typeof exDef==='string' ? exDef : exDef.n;
+    const setCount = (typeof exDef==='object' && exDef.sets) ? exDef.sets : 3;
+    const repTarget = (typeof exDef==='object' && exDef.reps) ? exDef.reps : '';
+    const lastW = getLastWeight(exName);
+    const ex=EX_DB.find(e=>e.n===exName)||{n:exName,c:'Other',i:'⚡',m:'General'};
+    return {
+      name:exName, cat:ex.c, repTarget,
+      sets: Array.from({length:setCount},()=>({w:lastW, r:repTarget, done:false})),
+      newPR:false
+    };
   })};
   woSec=0; clearInterval(woTimer);
   woTimer=setInterval(()=>{woSec++;const el=document.getElementById('wo-timer');if(el)el.textContent=fmtDur(woSec);},1000);
@@ -879,17 +946,26 @@ function renderActive(){
   if(!AW)return;
   document.getElementById('wo-name').textContent=AW.name;
   const list=document.getElementById('ex-list-active');
-  list.innerHTML=AW.exercises.map((ex,ei)=>`
-    <div class="ex-card card" id="exc-${ei}">
+  list.innerHTML=AW.exercises.map((ex,ei)=>{
+    const lastW=getLastWeight(ex.name);
+    const hasLastW=lastW!=='';
+    return`<div class="ex-card card" id="exc-${ei}">
       <div class="ex-head">
-        <div><div class="ex-name">${ex.name}</div><div class="ex-muscle">${getExMuscle(ex.name)}</div></div>
-        <div class="ex-del" onclick="delEx(${ei})">🗑</div>
+        <div>
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-muscle">${getExMuscle(ex.name)}${ex.repTarget?` <span style="color:var(--amber);font-weight:700">· ${ex.repTarget} reps</span>`:''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${hasLastW?`<div style="font-size:11px;color:var(--muted);text-align:right">Last<br><strong style="color:var(--text);font-size:13px">${lastW}kg</strong></div>`:''}
+          <div class="ex-del" onclick="delEx(${ei})">🗑</div>
+        </div>
       </div>
       <div class="sets-head"><span>SET</span><span>KG</span><span>REPS</span><span>PREV</span><span></span></div>
       ${ex.sets.map((s,si)=>renderSetRow(ei,si,s,ex)).join('')}
       <div class="add-set-btn" onclick="addSet(${ei})">+ Add Set</div>
       <div class="vol-row">Vol: <strong>${fmtN(ex.sets.filter(s=>s.done).reduce((sum,s)=>(sum+(parseFloat(s.w)||0)*(parseInt(s.r)||0)),0))} kg</strong></div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function renderSetRow(ei,si,s,ex){
@@ -898,11 +974,15 @@ function renderSetRow(ei,si,s,ex){
   const isPR=done&&pr&&parseFloat(s.w)>=pr.w&&parseInt(s.r)>=pr.r;
   const prevText=pr?`${pr.w}×${pr.r}`:'—';
   const isNext=!done&&si===ex.sets.findIndex(x=>!x.done);
+  // rep target as placeholder; if s.r is the target string show it as value
+  const repPlaceholder=ex.repTarget||'reps';
+  // weight placeholder shows last session weight if pre-filled
+  const wPlaceholder=s.w?`${s.w}kg`:'kg';
   return `<div class="set-row">
     <div class="set-n">${si+1}</div>
-    <input class="set-in${done?' done-in':''}" type="number" inputmode="decimal" placeholder="kg" value="${s.w}"
+    <input class="set-in${done?' done-in':''}" type="number" inputmode="decimal" placeholder="${wPlaceholder}" value="${s.w}"
       onchange="setVal(${ei},${si},'w',this.value)" ${done?'readonly':''}>
-    <input class="set-in${done?' done-in':''}" type="number" inputmode="numeric" placeholder="reps" value="${s.r}"
+    <input class="set-in${done?' done-in':''}" type="number" inputmode="numeric" placeholder="${repPlaceholder}" value="${s.r}"
       onchange="setVal(${ei},${si},'r',this.value)" ${done?'readonly':''}>
     <div class="set-prev${isPR?' is-pr':''}">${isPR?'👑 PR':prevText}</div>
     <div class="chk${done?' done':isNext?' next':''}" onclick="toggleSet(${ei},${si})">✓</div>
@@ -925,7 +1005,8 @@ function toggleSet(ei,si){
 function addSet(ei){
   if(!AW)return;
   const last=AW.exercises[ei].sets.at(-1);
-  AW.exercises[ei].sets.push({w:last?.w||'',r:last?.r||'',done:false});
+  const repTarget=AW.exercises[ei].repTarget||'';
+  AW.exercises[ei].sets.push({w:last?.w||'',r:last?.r||repTarget,done:false});
   renderActive();
 }
 
