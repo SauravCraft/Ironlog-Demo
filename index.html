@@ -830,7 +830,7 @@ function refreshHome(){
   }
 
   // Recent list
-  const recent=[...DB.workouts].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+  const recent=[...DB.workouts].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,3);
   const recEl=document.getElementById('home-recent');
   if(recent.length===0){
     recEl.innerHTML='<div class="empty"><div class="empty-icon">💪</div><div class="empty-title">No workouts yet</div><div class="empty-sub">Tap + to start your first session</div></div>';
@@ -840,7 +840,8 @@ function refreshHome(){
         <div class="h-icon">${woIcon(w.name)}</div>
         <div class="h-info"><div class="h-name">${w.name}</div><div class="h-meta">${fmtDate(w.date)} · ${fmtDur(w.duration)} · ${fmtN(calcVol(w))} kg</div></div>
         <div class="row-right">›</div>
-      </div>`).join('');
+      </div>`).join('')
+      +(DB.workouts.length>3?`<div onclick="navTo('history')" style="display:flex;align-items:center;justify-content:center;gap:5px;padding:14px 0 4px;cursor:pointer;color:var(--blue);font-size:14px;font-weight:700">View All Workouts <span style="font-size:17px;line-height:1">›</span></div>`:'');
   }
 }
 
