@@ -20,10 +20,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 .screen{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:90px;-webkit-overflow-scrolling:touch}
 .screen::-webkit-scrollbar{display:none}
 
-/* STATUS */
-.status-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px 4px;flex-shrink:0;background:var(--bg)}
-.status-time{font-size:14px;font-weight:600}
-.status-icons{font-size:11px;color:var(--muted)}
+
 
 /* NAV */
 .bottom-nav{position:absolute;bottom:0;left:0;right:0;background:rgba(13,13,13,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;padding:8px 0 20px;z-index:100}
@@ -364,10 +361,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 </head>
 <body>
 <div id="app">
-<div class="status-bar">
-  <span class="status-time" id="clock">9:41</span>
-  <span class="status-icons">● ● ● 📶 🔋</span>
-</div>
+
 
 <!-- ===== ONBOARDING ===== -->
 <div id="ob-screen">
@@ -454,7 +448,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
   </div>
   <div class="search-wrap">
     <div class="search-icon">🔍</div>
-    <input class="input" id="ex-search" placeholder="Search 29 exercises…" oninput="filterEx(this.value)" autocomplete="off">
+    <input class="input" id="ex-search" placeholder="Search exercises…" oninput="filterEx(this.value)" autocomplete="off">
   </div>
   <div class="chip-row" id="ex-chips">
     <div class="chip active" onclick="setCat('All',this)">All</div>
@@ -748,15 +742,40 @@ const EX_DB = [
   {n:'Plank',c:'Core',i:'🟰',m:'Core'},
   {n:'Crunch',c:'Core',i:'🌀',m:'Abs'},
   {n:'Running',c:'Cardio',i:'🏃',m:'Full Body'},
+  {n:'Wide Lat Pulldown',c:'Back',i:'⤵️',m:'Lats · Width'},
+  {n:'Chest Supported Row',c:'Back',i:'🚣',m:'Mid Back'},
+  {n:'Single Arm Lat Pulldown',c:'Back',i:'⤵️',m:'Lats'},
+  {n:'Straight Arm Pulldown',c:'Back',i:'⬇️',m:'Lats · Serratus'},
+  {n:'Skull Crusher',c:'Arms',i:'💀',m:'Triceps Long Head'},
+  {n:'Overhead Triceps Extension',c:'Arms',i:'🔼',m:'Triceps Long Head'},
+  {n:'Rope Pushdown',c:'Arms',i:'⬇',m:'Triceps'},
+  {n:'Incline Dumbbell Press',c:'Chest',i:'📐',m:'Upper Chest'},
+  {n:'Machine Chest Press',c:'Chest',i:'🏋️',m:'Pectorals'},
+  {n:'Cable Fly',c:'Chest',i:'🔗',m:'Pectorals'},
+  {n:'Preacher Curl',c:'Arms',i:'💪',m:'Biceps Peak'},
+  {n:'Incline Bicep Curl',c:'Arms',i:'📐',m:'Biceps Long Head'},
+  {n:'Hanging Leg Raise',c:'Core',i:'🔄',m:'Lower Abs'},
+  {n:'Cable Crunch',c:'Core',i:'🌀',m:'Abs'},
+  {n:'Vacuum Holds',c:'Core',i:'🫁',m:'TVA · Waist'},
+  {n:'Seated Dumbbell Press',c:'Shoulders',i:'🔝',m:'Full Deltoids'},
+  {n:'Dumbbell Lateral Raise',c:'Shoulders',i:'↔️',m:'Side Delts'},
+  {n:'Cable Lateral Raise',c:'Shoulders',i:'🔗',m:'Side Delts'},
+  {n:'Face Pull',c:'Shoulders',i:'🎯',m:'Rear Delts · Rotator Cuff'},
+  {n:'EZ Curl',c:'Arms',i:'〰️',m:'Biceps'},
+  {n:'Seated Cable Row',c:'Back',i:'🔄',m:'Mid Back · Thickness'},
+  {n:'Front Squat',c:'Legs',i:'🦵',m:'Quads'},
+  {n:'Lateral Raise Giant Set',c:'Shoulders',i:'↔️',m:'Side Delts'},
+  {n:'Rear Delt Cable Fly',c:'Shoulders',i:'🔙',m:'Rear Delts'},
 ];
 
 const TEMPLATES = [
-  {n:'Push Day',i:'🏋️',ex:['Bench Press','Incline Bench Press','Overhead Press','Lateral Raise','Tricep Pushdown'],est:'65 min'},
-  {n:'Pull Day',i:'💪',ex:['Pull-Up','Barbell Row','Lat Pulldown','Bicep Curl','Hammer Curl'],est:'60 min'},
-  {n:'Leg Day',i:'🦵',ex:['Squat','Romanian Deadlift','Leg Press','Leg Curl','Calf Raise'],est:'70 min'},
-  {n:'Upper Body',i:'⬆️',ex:['Bench Press','Barbell Row','Overhead Press','Pull-Up','Bicep Curl'],est:'75 min'},
-  {n:'Full Body',i:'⚡',ex:['Squat','Bench Press','Deadlift','Overhead Press','Bicep Curl'],est:'80 min'},
-  {n:'Custom',i:'✏️',ex:[],est:'—'},
+  {n:'Back Width + Triceps',i:'🦺',focus:'Wide lats and bicep peak',ex:['Pull-Up','Wide Lat Pulldown','Chest Supported Row','Single Arm Lat Pulldown','Straight Arm Pulldown','Skull Crusher','Overhead Triceps Extension','Rope Pushdown'],est:'85–95 min'},
+  {n:'Chest + Biceps',i:'🫁',focus:'Upper chest dominance and tricep thickness',ex:['Incline Bench Press','Incline Dumbbell Press','Machine Chest Press','Cable Fly','Preacher Curl','Hammer Curl','Incline Bicep Curl'],est:'80–95 min'},
+  {n:'Legs + Abs',i:'🦵',focus:'Athletic leg proportions and a tight waist',ex:['Squat','Romanian Deadlift','Leg Press','Leg Curl','Calf Raise','Hanging Leg Raise','Cable Crunch','Vacuum Holds'],est:'90–110 min'},
+  {n:'Shoulders + Arms',i:'🎯',focus:'Side delts and arm volume',ex:['Seated Dumbbell Press','Dumbbell Lateral Raise','Cable Lateral Raise','Rear Delt Fly','Face Pull','EZ Curl','Rope Pushdown'],est:'80–95 min'},
+  {n:'Back Thickness + Chest',i:'💪',focus:'3D upper body density',ex:['T-Bar Row','Barbell Row','Seated Cable Row','Incline Dumbbell Press','Cable Fly'],est:'75–90 min'},
+  {n:'Legs + Shoulders',i:'⚡',focus:'Quad sweep and lateral delt frequency',ex:['Front Squat','Bulgarian Split Squat','Leg Curl','Lateral Raise Giant Set','Rear Delt Cable Fly'],est:'85–100 min'},
+  {n:'Custom',i:'✏️',focus:'',ex:[],est:'—'},
 ];
 
 const PLATE_DATA = [
@@ -768,10 +787,6 @@ const PLATE_DATA = [
 // ===== STORAGE =====
 function load(){ try{const d=localStorage.getItem('il_v3');if(d)DB=JSON.parse(d);}catch(e){} }
 function save(){ try{localStorage.setItem('il_v3',JSON.stringify(DB));}catch(e){} }
-
-// ===== CLOCK =====
-function tick(){ document.getElementById('clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
-setInterval(tick,10000); tick();
 
 // ===== NAV =====
 const ALL_SCREENS=['home','workout','addex','rest','progress','history','profile','platecalc','aicoach','bodystats','complete'];
@@ -836,11 +851,11 @@ function refreshHome(){
   }
 
   // Today card
-  const dayIdx=new Date().getDay()%5;
+  const dayIdx=new Date().getDay()%6;
   const tmpl=TEMPLATES[dayIdx];
   document.getElementById('today-name').textContent=tmpl.n;
   document.getElementById('today-time').textContent='⏱ '+tmpl.est;
-  document.getElementById('today-count').textContent='⚡ '+tmpl.ex.length+' exercises';
+  document.getElementById('today-count').textContent='⚡ '+(tmpl.ex.length||'?')+' exercises';
   document.getElementById('today-emoji').textContent=tmpl.i;
 
   // AI nudge
@@ -871,7 +886,7 @@ function refreshHome(){
 
 // ===== WORKOUT =====
 function handleFAB(){ if(AW){navTo('workout');return;} showTplSheet(); }
-function startWorkoutFromHome(){ const d=new Date().getDay()%5; selectTpl(TEMPLATES[d].n); }
+function startWorkoutFromHome(){ const d=new Date().getDay()%6; selectTpl(TEMPLATES[d].n); }
 
 function showTplSheet(){
   const sh=mkSheet('Start Workout',`
