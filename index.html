@@ -892,6 +892,13 @@ function loadLS(){
 function save(){
   saveLS(DB);        // instant sync for this session
   saveIDB(DB);       // durable persist across reinstalls
+  // Flash the auto-save dot if we're in the workout screen
+  const dot = document.getElementById('autosave-dot');
+  if(dot){
+    dot.classList.add('show');
+    clearTimeout(dot._t);
+    dot._t = setTimeout(()=>dot.classList.remove('show'), 1500);
+  }
 }
 
 async function load(){
@@ -1042,6 +1049,19 @@ function getLastWeight(exName){
   return '';
 }
 
+// Returns array of {w, r} from last session for each set position
+function getLastSessionSets(exName){
+  const past=[...DB.workouts].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  for(const w of past){
+    const ex=w.exercises?.find(e=>e.name===exName);
+    if(ex){
+      const doneSets=ex.sets?.filter(s=>s.done);
+      if(doneSets?.length) return doneSets;
+    }
+  }
+  return [];
+}
+
 function selectTpl(name){
   document.querySelectorAll('.overlay').forEach(e=>e.remove());
   const tmpl=TEMPLATES.find(t=>t.n===name);
@@ -1049,11 +1069,21 @@ function selectTpl(name){
     const exName = typeof exDef==='string' ? exDef : exDef.n;
     const setCount = (typeof exDef==='object' && exDef.sets) ? exDef.sets : 3;
     const repTarget = (typeof exDef==='object' && exDef.reps) ? exDef.reps : '';
+    const lastSets = getLastSessionSets(exName);
     const lastW = getLastWeight(exName);
     const ex=EX_DB.find(e=>e.n===exName)||{n:exName,c:'Other',i:'⚡',m:'General'};
     return {
       name:exName, cat:ex.c, repTarget,
-      sets: Array.from({length:setCount},()=>({w:lastW, r:repTarget, done:false})),
+      sets: Array.from({length:setCount},(_,si)=>{
+        const prev = lastSets[si];
+        return {
+          w: prev?.w || lastW,
+          r: prev?.r || repTarget,
+          done: false,
+          prevW: prev?.w || lastW,
+          prevR: prev?.r || ''
+        };
+      }),
       newPR:false
     };
   })};
@@ -1080,7 +1110,7 @@ function renderActive(){
           <div class="ex-del" onclick="delEx(${ei})">🗑</div>
         </div>
       </div>
-      <div class="sets-head"><span>SET</span><span>KG</span><span>REPS</span><span>PREV</span><span></span></div>
+      <div class="sets-head"><span>SET</span><span>KG</span><span>REPS</span><span title="Last session weight × reps for this set">LAST</span><span></span></div>
       ${ex.sets.map((s,si)=>renderSetRow(ei,si,s,ex)).join('')}
       <div class="add-set-btn" onclick="addSet(${ei})">+ Add Set</div>
       <div class="vol-row">Vol: <strong>${fmtN(ex.sets.filter(s=>s.done).reduce((sum,s)=>(sum+(parseFloat(s.w)||0)*(parseInt(s.r)||0)),0))} kg</strong></div>
@@ -1092,19 +1122,30 @@ function renderSetRow(ei,si,s,ex){
   const pr=DB.prs[ex.name];
   const done=s.done;
   const isPR=done&&pr&&parseFloat(s.w)>=pr.w&&parseInt(s.r)>=pr.r;
-  const prevText=pr?`${pr.w}×${pr.r}`:'—';
   const isNext=!done&&si===ex.sets.findIndex(x=>!x.done);
-  // rep target as placeholder; if s.r is the target string show it as value
   const repPlaceholder=ex.repTarget||'reps';
-  // weight placeholder shows last session weight if pre-filled
   const wPlaceholder=s.w?`${s.w}kg`:'kg';
+
+  // Previous session data for this specific set index
+  const hasPrev = s.prevW || s.prevR;
+  let prevLabel = '—';
+  if(isPR){
+    prevLabel = '👑 PR';
+  } else if(hasPrev && s.prevW && s.prevR){
+    prevLabel = `${s.prevW}×${s.prevR}`;
+  } else if(hasPrev && s.prevW){
+    prevLabel = `${s.prevW}kg`;
+  } else if(pr){
+    prevLabel = `${pr.w}×${pr.r}`;
+  }
+
   return `<div class="set-row">
     <div class="set-n">${si+1}</div>
     <input class="set-in${done?' done-in':''}" type="number" inputmode="decimal" placeholder="${wPlaceholder}" value="${s.w}"
       onchange="setVal(${ei},${si},'w',this.value)" ${done?'readonly':''}>
     <input class="set-in${done?' done-in':''}" type="number" inputmode="numeric" placeholder="${repPlaceholder}" value="${s.r}"
       onchange="setVal(${ei},${si},'r',this.value)" ${done?'readonly':''}>
-    <div class="set-prev${isPR?' is-pr':''}">${isPR?'👑 PR':prevText}</div>
+    <div class="set-prev${isPR?' is-pr':hasPrev?' has-prev':''}">${prevLabel}</div>
     <div class="chk${done?' done':isNext?' next':''}" onclick="toggleSet(${ei},${si})">✓</div>
   </div>`;
 }
@@ -1120,22 +1161,38 @@ function toggleSet(ei,si){
   if(s.done){
     haptic([30]);
     checkPR(AW.exercises[ei].name,s);
-    // flash the checkmark row briefly
+    save();
+    // Flash the checkmark row green briefly
     setTimeout(()=>{
       const rows=document.querySelectorAll(`#exc-${ei} .set-row`);
       if(rows[si]){ rows[si].style.transition='background .15s'; rows[si].style.background='rgba(34,197,94,.12)'; setTimeout(()=>rows[si].style.background='',350); }
     },0);
+    // Auto-complete: if ALL sets across all exercises are done, prompt finish
+    const allDone = AW.exercises.length > 0 && AW.exercises.every(ex=>ex.sets.length>0 && ex.sets.every(st=>st.done));
+    if(allDone){
+      haptic([40,30,80,30,120]);
+      setTimeout(()=>{
+        showToast('\uD83C\uDF89 All sets done! Great work!');
+        setTimeout(()=>{
+          if(AW && confirm('All sets complete! Finish and save your workout?')){
+            finishWorkout();
+          }
+        }, 1200);
+      }, 400);
+    }
   } else {
     haptic([15]);
+    save();
   }
   renderActive();
 }
 
 function addSet(ei){
   if(!AW)return;
-  const last=AW.exercises[ei].sets.at(-1);
-  const repTarget=AW.exercises[ei].repTarget||'';
-  AW.exercises[ei].sets.push({w:last?.w||'',r:last?.r||repTarget,done:false});
+  const ex=AW.exercises[ei];
+  const last=ex.sets.at(-1);
+  const repTarget=ex.repTarget||'';
+  ex.sets.push({w:last?.w||'',r:last?.r||repTarget,done:false,prevW:last?.prevW||'',prevR:last?.prevR||''});
   renderActive();
 }
 
@@ -1264,7 +1321,10 @@ function setCat(c,el){
 
 function addExToWorkout(name,cat){
   if(!AW){ selectTpl('Custom'); }
-  AW.exercises.push({name,cat,sets:[{w:'',r:'',done:false}],newPR:false});
+  const lastSets=getLastSessionSets(name);
+  const lastW=getLastWeight(name);
+  const prev=lastSets[0];
+  AW.exercises.push({name,cat,sets:[{w:prev?.w||lastW,r:prev?.r||'',done:false,prevW:prev?.w||lastW,prevR:prev?.r||''}],newPR:false});
   showToast(name+' added ✓');
   navTo('workout'); renderActive();
 }
@@ -1628,42 +1688,65 @@ function toggleUnits(){
 }
 // ===== EXPORT / IMPORT / RESET =====
 function exportData(){
-  const payload = {
-    _version: 2,
-    _exported: new Date().toISOString(),
-    _app: 'IronLog',
-    ...DB
-  };
-  const json = JSON.stringify(payload, null, 2);
-  const blob = new Blob([json], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'ironlog_backup_' + dKey(new Date()) + '.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url), 1000);
-  showToast('✅ Backup saved to Downloads');
+  try {
+    const payload = {
+      _version: 2,
+      _exported: new Date().toISOString(),
+      _app: 'IronLog',
+      ...DB
+    };
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ironlog_backup_' + dKey(new Date()) + '.json';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    // Use setTimeout to ensure anchor is in DOM before click
+    setTimeout(() => {
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 300);
+    }, 10);
+    showToast('✅ Backup saved to Downloads');
+  } catch(err) {
+    showToast('❌ Export failed: ' + err.message);
+  }
 }
 
 function importData(){
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json,application/json';
+  // Keep input in DOM during the entire file-pick flow (mobile requires this)
+  let input = document.getElementById('_import_input');
+  if(!input){
+    input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.id = '_import_input';
+    input.style.cssText = 'position:fixed;top:-200px;left:-200px;opacity:0;pointer-events:none';
+    document.body.appendChild(input);
+  }
+  // Reset value so same file can be re-imported
+  input.value = '';
+
   input.onchange = async (e) => {
     const file = e.target.files[0];
     if(!file) return;
     try {
       const text = await file.text();
-      const parsed = JSON.parse(text);
+      let parsed;
+      try { parsed = JSON.parse(text); }
+      catch(parseErr) { showToast('❌ File is not valid JSON'); return; }
+
       // Validate it's an IronLog backup
       if(!parsed.workouts || !Array.isArray(parsed.workouts)){
-        showToast('❌ Invalid backup file');
+        showToast('❌ Invalid IronLog backup file');
         return;
       }
       const count = parsed.workouts.length;
-      if(!confirm(`Restore ${count} workout${count!==1?'s':''} from "${file.name}"?\n\nThis will merge with your current data.`)) return;
+      if(!confirm(`Restore ${count} workout${count!==1?'s':''} from backup?\n\nThis will merge with your current data (no data lost).`)) return;
 
       // Merge workouts by id (avoid duplicates)
       const existingIds = new Set(DB.workouts.map(w=>String(w.id)));
@@ -1676,20 +1759,18 @@ function importData(){
         if(!DB.prs[name] || pr.w > DB.prs[name].w) DB.prs[name] = pr;
       }
 
-      // Restore body stats and settings if not set
+      // Restore body stats and settings if not already set
       if(!DB.body?.weight && parsed.body) DB.body = parsed.body;
       if(parsed.settings) DB.settings = {...DB.settings, ...parsed.settings};
 
-      await save();
+      save();
       refreshHome();
-      showToast(`✅ Restored ${newWorkouts.length} new workouts`);
+      showToast(`✅ Imported ${newWorkouts.length} new workout${newWorkouts.length!==1?'s':''}`);
     } catch(err) {
-      showToast('❌ Failed to read file');
+      showToast('❌ Import failed: ' + (err.message||'unknown error'));
     }
   };
-  document.body.appendChild(input);
   input.click();
-  document.body.removeChild(input);
 }
 
 async function clearData(){
