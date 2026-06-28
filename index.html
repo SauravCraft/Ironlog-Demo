@@ -662,7 +662,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-sy
 
 <script>
 // ===== DATA LAYER =====
-let DB = { workouts:[], prs:{}, body:{}, settings:{units:'KG'} };
+let DB = { workouts:[], prs:{}, body:{}, settings:{units:'KG', nextDayIdx:0} };
 let AW = null; // active workout
 let woTimer = null, woSec = 0;
 let calDate = new Date();
@@ -811,7 +811,7 @@ function refreshHome(){
   }
 
   // Today card
-  const dayIdx=new Date().getDay()%6;
+  const dayIdx=(DB.settings.nextDayIdx||0)%6;
   const tmpl=TEMPLATES[dayIdx];
   document.getElementById('today-name').textContent=tmpl.n;
   document.getElementById('today-time').textContent='⏱ '+tmpl.est;
@@ -846,7 +846,7 @@ function refreshHome(){
 
 // ===== WORKOUT =====
 function handleFAB(){ if(AW){navTo('workout');return;} showTplSheet(); }
-function startWorkoutFromHome(){ const d=new Date().getDay()%6; selectTpl(TEMPLATES[d].n); }
+function startWorkoutFromHome(){ selectTpl(TEMPLATES[(DB.settings.nextDayIdx||0)%6].n); }
 
 function showTplSheet(){
   const sh=mkSheet('Start Workout',`
@@ -956,7 +956,9 @@ function finishWorkout(){
   AW.duration=woSec;
   const doneSets=AW.exercises.flatMap(e=>e.sets.filter(s=>s.done));
   const vol=doneSets.reduce((sum,s)=>sum+(parseFloat(s.w)||0)*(parseInt(s.r)||0),0);
-  DB.workouts.push({...AW}); save();
+  DB.workouts.push({...AW});
+  DB.settings.nextDayIdx = ((DB.settings.nextDayIdx||0) + 1) % 6;
+  save();
 
   document.getElementById('cs-dur').textContent=fmtDur(woSec);
   document.getElementById('cs-vol').textContent=fmtN(vol);
