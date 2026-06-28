@@ -548,14 +548,38 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
   </div>
   <div class="sec-title">Achievements</div>
   <div class="card" style="margin:0 16px 14px"><div class="badge-grid" id="badge-grid"></div></div>
+  <div class="sec-title">Data & Backup</div>
+  <div class="card" style="margin:0 16px 14px">
+    <div id="backup-status" style="padding:14px 16px;border-bottom:1px solid #1E1E1E">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Storage Status</div>
+      <div style="display:flex;gap:10px">
+        <div id="idb-status" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;text-align:center">
+          <div style="font-size:18px;margin-bottom:3px">💾</div>
+          <div style="font-size:12px;font-weight:700">IndexedDB</div>
+          <div id="idb-lbl" style="font-size:11px;color:var(--muted);margin-top:2px">Checking…</div>
+        </div>
+        <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;text-align:center">
+          <div style="font-size:18px;margin-bottom:3px">📦</div>
+          <div style="font-size:12px;font-weight:700">Workouts</div>
+          <div id="wo-count-lbl" style="font-size:11px;color:var(--muted);margin-top:2px">0 logged</div>
+        </div>
+        <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;text-align:center">
+          <div style="font-size:18px;margin-bottom:3px">👑</div>
+          <div style="font-size:12px;font-weight:700">PRs</div>
+          <div id="pr-count-lbl" style="font-size:11px;color:var(--muted);margin-top:2px">0 records</div>
+        </div>
+      </div>
+    </div>
+    <div class="setting-row" onclick="exportData()"><div class="setting-icon">📤</div><div class="setting-lbl">Export Backup</div><div class="setting-val">JSON file</div><div class="setting-chev">›</div></div>
+    <div class="setting-row" onclick="importData()"><div class="setting-icon">📥</div><div class="setting-lbl">Import Backup</div><div class="setting-val">Restore</div><div class="setting-chev">›</div></div>
+    <div class="setting-row" onclick="clearData()"><div class="setting-icon">🗑️</div><div class="setting-lbl">Reset All Data</div><div class="setting-val" style="color:var(--red)">Danger</div><div class="setting-chev">›</div></div>
+  </div>
   <div class="sec-title">Settings</div>
   <div class="card" style="margin:0 16px 80px">
     <div class="setting-row" onclick="toggleUnits()"><div class="setting-icon">⚖️</div><div class="setting-lbl">Units</div><div class="setting-val" id="units-lbl">KG</div><div class="setting-chev">›</div></div>
     <div class="setting-row" onclick="navTo('platecalc')"><div class="setting-icon">⚖️</div><div class="setting-lbl">Plate Calculator</div><div class="setting-val">Barbell</div><div class="setting-chev">›</div></div>
     <div class="setting-row" onclick="navTo('aicoach')"><div class="setting-icon">🤖</div><div class="setting-lbl">AI Coach</div><div class="setting-val">Active</div><div class="setting-chev">›</div></div>
     <div class="setting-row" onclick="navTo('bodystats')"><div class="setting-icon">📏</div><div class="setting-lbl">Body Measurements</div><div class="setting-val">Track</div><div class="setting-chev">›</div></div>
-    <div class="setting-row" onclick="exportData()"><div class="setting-icon">📤</div><div class="setting-lbl">Export Data</div><div class="setting-val">JSON</div><div class="setting-chev">›</div></div>
-    <div class="setting-row" onclick="clearData()"><div class="setting-icon">🗑️</div><div class="setting-lbl">Reset All Data</div><div class="setting-val" style="color:var(--red)">Danger</div><div class="setting-chev">›</div></div>
   </div>
 </div>
 
@@ -819,9 +843,68 @@ const PLATE_DATA = [
   {w:1.25,c:'#A1A1AA',h:30,pw:8}
 ];
 
-// ===== STORAGE =====
-function load(){ try{const d=localStorage.getItem('il_v3');if(d)DB=JSON.parse(d);}catch(e){} }
-function save(){ try{localStorage.setItem('il_v3',JSON.stringify(DB));}catch(e){} }
+// ===== STORAGE (IndexedDB primary, localStorage fallback) =====
+const IDB_NAME = 'IronLogDB', IDB_STORE = 'data', IDB_KEY = 'db_v1';
+let _idb = null;
+
+function openIDB(){
+  return new Promise((res,rej)=>{
+    if(_idb){res(_idb);return;}
+    const req=indexedDB.open(IDB_NAME,1);
+    req.onupgradeneeded=e=>e.target.result.createObjectStore(IDB_STORE);
+    req.onsuccess=e=>{_idb=e.target.result;res(_idb);};
+    req.onerror=()=>rej(req.error);
+  });
+}
+
+async function saveIDB(data){
+  try{
+    const db=await openIDB();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction(IDB_STORE,'readwrite');
+      tx.objectStore(IDB_STORE).put(JSON.stringify(data),IDB_KEY);
+      tx.oncomplete=()=>res(true);
+      tx.onerror=()=>rej(tx.error);
+    });
+  }catch(e){return false;}
+}
+
+async function loadIDB(){
+  try{
+    const db=await openIDB();
+    return new Promise((res,rej)=>{
+      const tx=db.transaction(IDB_STORE,'readonly');
+      const req=tx.objectStore(IDB_STORE).get(IDB_KEY);
+      req.onsuccess=()=>res(req.result?JSON.parse(req.result):null);
+      req.onerror=()=>rej(req.error);
+    });
+  }catch(e){return null;}
+}
+
+function saveLS(data){
+  try{localStorage.setItem('il_v3',JSON.stringify(data));}catch(e){}
+}
+
+function loadLS(){
+  try{const d=localStorage.getItem('il_v3');return d?JSON.parse(d):null;}catch(e){return null;}
+}
+
+function save(){
+  saveLS(DB);        // instant sync for this session
+  saveIDB(DB);       // durable persist across reinstalls
+}
+
+async function load(){
+  // Try IndexedDB first (survives app reinstall, more storage)
+  let data = await loadIDB();
+  // Fall back to localStorage (in case IDB not yet populated)
+  if(!data) data = loadLS();
+  if(data){
+    DB = {...DB, ...data};
+    // Ensure settings has all required keys
+    DB.settings = {units:'KG', nextDayIdx:0, ...DB.settings};
+  }
+}
 
 // ===== NAV =====
 const ALL_SCREENS=['home','workout','addex','plan','progress','history','profile','platecalc','aicoach','bodystats','complete'];
@@ -1514,6 +1597,17 @@ function refreshProfile(){
   document.getElementById('prof-s').textContent=calcStreak();
   document.getElementById('prof-v').textContent=fmtN(vol);
   document.getElementById('units-lbl').textContent=DB.settings.units;
+  // Storage status
+  document.getElementById('wo-count-lbl').textContent=DB.workouts.length+' logged';
+  document.getElementById('pr-count-lbl').textContent=Object.keys(DB.prs).length+' records';
+  // Check IDB health
+  loadIDB().then(d=>{
+    const el=document.getElementById('idb-lbl');
+    if(el) el.textContent=d?'✅ Active':'⚠️ Empty';
+  }).catch(()=>{
+    const el=document.getElementById('idb-lbl');
+    if(el) el.textContent='❌ Unavailable';
+  });
   const badges=[
     {i:'🏋️',l:'First Lift',u:DB.workouts.length>=1},
     {i:'🔥',l:'3-Day Streak',u:calcStreak()>=3},
@@ -1532,17 +1626,84 @@ function toggleUnits(){
   save(); document.getElementById('units-lbl').textContent=DB.settings.units;
   showToast('Units: '+DB.settings.units);
 }
+// ===== EXPORT / IMPORT / RESET =====
 function exportData(){
-  const b=new Blob([JSON.stringify(DB,null,2)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(b);
-  a.download='ironlog_'+dKey(new Date())+'.json'; a.click();
-  showToast('Data exported ✓');
+  const payload = {
+    _version: 2,
+    _exported: new Date().toISOString(),
+    _app: 'IronLog',
+    ...DB
+  };
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ironlog_backup_' + dKey(new Date()) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  showToast('✅ Backup saved to Downloads');
 }
-function clearData(){
-  if(confirm('⚠️ Delete ALL workout data permanently?')){
-    DB={workouts:[],prs:{},body:{},settings:{units:'KG'}};
-    save(); navTo('home'); showToast('Data cleared');
-  }
+
+function importData(){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if(!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      // Validate it's an IronLog backup
+      if(!parsed.workouts || !Array.isArray(parsed.workouts)){
+        showToast('❌ Invalid backup file');
+        return;
+      }
+      const count = parsed.workouts.length;
+      if(!confirm(`Restore ${count} workout${count!==1?'s':''} from "${file.name}"?\n\nThis will merge with your current data.`)) return;
+
+      // Merge workouts by id (avoid duplicates)
+      const existingIds = new Set(DB.workouts.map(w=>String(w.id)));
+      const newWorkouts = (parsed.workouts||[]).filter(w=>!existingIds.has(String(w.id)));
+      DB.workouts = [...DB.workouts, ...newWorkouts];
+
+      // Merge PRs (keep highest)
+      const importedPRs = parsed.prs || {};
+      for(const [name, pr] of Object.entries(importedPRs)){
+        if(!DB.prs[name] || pr.w > DB.prs[name].w) DB.prs[name] = pr;
+      }
+
+      // Restore body stats and settings if not set
+      if(!DB.body?.weight && parsed.body) DB.body = parsed.body;
+      if(parsed.settings) DB.settings = {...DB.settings, ...parsed.settings};
+
+      await save();
+      refreshHome();
+      showToast(`✅ Restored ${newWorkouts.length} new workouts`);
+    } catch(err) {
+      showToast('❌ Failed to read file');
+    }
+  };
+  document.body.appendChild(input);
+  input.click();
+  document.body.removeChild(input);
+}
+
+async function clearData(){
+  if(!confirm('⚠️ Delete ALL workout data permanently? This cannot be undone.')) return;
+  DB = {workouts:[], prs:{}, body:{}, settings:{units:'KG', nextDayIdx:0}};
+  // Clear both storages
+  saveLS(DB);
+  try{
+    const db=await openIDB();
+    const tx=db.transaction(IDB_STORE,'readwrite');
+    tx.objectStore(IDB_STORE).delete(IDB_KEY);
+  }catch(e){}
+  navTo('home');
+  showToast('Data cleared');
 }
 
 // ===== PLATE CALC =====
@@ -1780,10 +1941,12 @@ function showToast(msg){
 }
 
 // ===== INIT =====
-load();
-const isNew=!localStorage.getItem('il_ob');
-if(isNew){ document.getElementById('ob-screen').style.display='flex'; }
-else { navTo('home'); }
+(async function init(){
+  await load();
+  const isNew=!localStorage.getItem('il_ob');
+  if(isNew){ document.getElementById('ob-screen').style.display='flex'; }
+  else { navTo('home'); }
+})();
 </script>
 </body>
 </html>
