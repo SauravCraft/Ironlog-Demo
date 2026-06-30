@@ -503,7 +503,7 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 
   <!-- QUICK ACTIONS -->
   <div class="quick-actions">
-    <div class="qa-btn card" onclick="navTo('progress')"><div class="qa-icon">📊</div><div class="qa-label">Progress</div></div>
+    <div class="qa-btn card" onclick="navTo('history')"><div class="qa-icon">🕓</div><div class="qa-label">History</div></div>
     <div class="qa-btn card" onclick="navTo('bodystats')"><div class="qa-icon">📏</div><div class="qa-label">Body Stats</div></div>
   </div>
 
@@ -593,11 +593,17 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
     <div class="info-row card"><div class="info-left">🔥 Current Streak</div><div class="info-right"><span id="p-streak">0</span> days ›</div></div>
     <div class="info-row card"><div class="info-left">🏋 Total Workouts</div><div class="info-right"><span id="p-total">0</span> ›</div></div>
     <div class="info-row card"><div class="info-left">⏱ Avg Duration</div><div class="info-right"><span id="p-dur">—</span> ›</div></div>
+    <div class="chart-card card" id="bw-trend-card" style="display:none">
+      <div class="chart-hdr"><div class="chart-lbl">Body Weight Trend</div><div class="chart-sub" id="bw-trend-sub">—</div></div>
+      <div id="bw-trend-chart"></div>
+    </div>
   </div>
 
   <!-- STRENGTH TAB -->
   <div id="tab-strength" style="display:none">
     <div id="strength-prs"></div>
+    <div class="sec-title" style="margin-top:6px">PR Timeline</div>
+    <div class="card" style="margin:0 16px 14px" id="pr-timeline"></div>
   </div>
 
   <!-- VOLUME TAB -->
@@ -781,9 +787,9 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
     <div class="nav-label">Plan</div>
   </div>
   <div class="nav-center"><div class="fab" onclick="handleFAB()">+</div></div>
-  <div class="nav-item" id="nav-history" onclick="navTo('history')">
-    <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
-    <div class="nav-label">History</div>
+  <div class="nav-item" id="nav-progress" onclick="navTo('progress')">
+    <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-5 3 3 5-7"/></svg></div>
+    <div class="nav-label">Progress</div>
   </div>
   <div class="nav-item" id="nav-profile" onclick="navTo('profile')">
     <div class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
@@ -990,7 +996,7 @@ async function load(){
 
 // ===== NAV =====
 const ALL_SCREENS=['home','workout','addex','plan','progress','history','profile','bodystats','complete'];
-const NAV_SCREENS=['home','plan','history','profile'];
+const NAV_SCREENS=['home','plan','progress','profile'];
 const NO_NAV=['workout','complete'];
 let screenStack=[];
 
@@ -1862,6 +1868,9 @@ function refreshProgress(){
       </div>
       <div style="font-size:11px;color:var(--muted);width:52px;text-align:right">${fmtN(vol)}kg</div>
     </div>`).join('');
+
+  renderBodyWeightTrend();
+  renderPrTimeline();
 }
 
 function renderSparkline(id,vals,max){
@@ -2476,6 +2485,53 @@ function renderConsistencyTab(){
     cells.push(`<div title="${dKey(d)}: ${fmtN(v)}${DB.settings.units}" style="width:9.5%;aspect-ratio:1;border-radius:3px;background:${heatCellColor(v,max)}"></div>`);
   }
   document.getElementById('consistency-heatmap').innerHTML=cells.join('');
+}
+
+// ===== BODY WEIGHT TREND =====
+function renderBodyWeightTrend(){
+  const card=document.getElementById('bw-trend-card');
+  const hist=(DB.body?.bodyHistory||[]).filter(h=>h.weight).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(hist.length<2){ card.style.display='none'; return; }
+  card.style.display='block';
+  const first=hist[0], last=hist[hist.length-1];
+  const delta=Math.round((last.weight-first.weight)*10)/10;
+  document.getElementById('bw-trend-sub').textContent=`${delta>=0?'+':''}${delta}kg over ${hist.length} entries`;
+  const vw=300, vh=86, pad=10;
+  const vals=hist.map(h=>h.weight);
+  const maxV=Math.max(...vals), minV=Math.min(...vals);
+  const range=(maxV-minV)||1;
+  const stepX=hist.length>1?(vw-2*pad)/(hist.length-1):0;
+  const toY=v=>vh-pad-((v-minV)/range)*(vh-2*pad);
+  const pts=hist.map((h,i)=>`${pad+i*stepX},${toY(h.weight)}`).join(' ');
+  document.getElementById('bw-trend-chart').innerHTML=`<svg viewBox="0 0 ${vw} ${vh}" style="width:100%;height:86px;display:block">
+    <polyline points="${pts}" fill="none" stroke="var(--blue)" stroke-width="2"/>
+    ${hist.map((h,i)=>`<circle cx="${pad+i*stepX}" cy="${toY(h.weight)}" r="2.5" fill="var(--blue)"/>`).join('')}
+  </svg>
+  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px"><span>${fmtDate(first.date)} · ${first.weight}kg</span><span>${fmtDate(last.date)} · ${last.weight}kg</span></div>`;
+}
+
+// ===== PR TIMELINE =====
+function renderPrTimeline(){
+  const el=document.getElementById('pr-timeline');
+  if(!el)return;
+  const events=[];
+  Object.keys(DB.prs).forEach(name=>{
+    const pts=getExerciseHistory(name);
+    let best=0;
+    pts.forEach(p=>{ if(p.e1rm>best){ events.push({name, date:p.date, e1rm:p.e1rm, w:p.w, r:p.r}); best=p.e1rm; } });
+  });
+  events.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const top=events.slice(0,12);
+  if(!top.length){ el.innerHTML='<div class="empty" style="padding:24px"><div class="empty-icon">👑</div><div class="empty-title">No PRs yet</div></div>'; return; }
+  el.innerHTML=top.map(e=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #1E1E1E">
+      <div style="width:34px;height:34px;border-radius:10px;background:var(--amber-dim);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">👑</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${e.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">${fmtDate(e.date)} · ${e.w}kg × ${e.r}</div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--amber)">${e.e1rm}kg 1RM</div>
+    </div>`).join('');
 }
 
 // ===== HELPERS =====
