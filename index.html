@@ -177,10 +177,6 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 .streak-dots{display:flex;gap:5px;margin-top:10px}
 .s-dot{height:6px;flex:1;border-radius:3px;background:var(--border)}
 .s-dot.on{background:var(--blue)}
-.ai-card{margin:0 16px 10px;padding:16px 16px;display:flex;gap:14px;align-items:center;background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(99,102,241,0.05)),var(--card);border:1px solid rgba(59,130,246,0.18)}
-.ai-icon{width:42px;height:42px;background:var(--blue-dim);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.ai-text{font-size:14px;color:var(--muted);line-height:1.5}
-.ai-text strong{color:var(--text);font-weight:700}
 .quick-actions{margin:0 16px 12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .qa-btn{padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:opacity .15s;min-height:72px;justify-content:center}
 .qa-btn:active{opacity:.6}
@@ -405,8 +401,8 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
           <div><div style="font-size:15px;font-weight:700;margin-bottom:2px">PR auto-detection</div><div style="font-size:13px;color:var(--muted)">Volume curves, strength trends, PRs tracked</div></div>
         </div>
         <div style="display:flex;align-items:center;gap:14px;text-align:left">
-          <div style="width:46px;height:46px;min-width:46px;background:var(--blue-dim);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px">🤖</div>
-          <div><div style="font-size:15px;font-weight:700;margin-bottom:2px">Real AI coaching</div><div style="font-size:13px;color:var(--muted)">Powered by Claude — knows your sessions</div></div>
+          <div style="width:46px;height:46px;min-width:46px;background:var(--blue-dim);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px">📅</div>
+          <div><div style="font-size:15px;font-weight:700;margin-bottom:2px">Consistency heatmap</div><div style="font-size:13px;color:var(--muted)">See every training day at a glance</div></div>
         </div>
       </div>
     </div>
@@ -495,8 +491,15 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
     <div class="stat-card card"><div class="stat-label">🏋 Workouts</div><div class="stat-value" id="h-count">0</div><div class="stat-sub">total logged</div></div>
   </div>
 
-  <!-- AI NUDGE -->
-  <div class="ai-card card"><div class="ai-icon">🤖</div><div class="ai-text" id="ai-text"><strong>AI Insight:</strong> Log your first workout to get personalized suggestions!</div></div>
+  <!-- PROGRESS SNAPSHOT -->
+  <div class="card" style="margin:0 16px 10px;padding:16px" id="home-snapshot">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:var(--text)">📈 Progress Snapshot</div>
+      <div style="font-size:12px;color:var(--blue);font-weight:700;cursor:pointer" onclick="navTo('progress')">Full report ›</div>
+    </div>
+    <div id="home-snap-text" style="font-size:13px;color:var(--muted);margin-bottom:10px">Log your first workout to start tracking trends.</div>
+    <div id="home-heat-strip" style="display:flex;gap:4px"></div>
+  </div>
 
   <!-- QUICK ACTIONS -->
   <div class="quick-actions">
@@ -571,6 +574,7 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
     <div class="seg-btn active" onclick="progTab('overview',this)">Overview</div>
     <div class="seg-btn" onclick="progTab('strength',this)">Strength</div>
     <div class="seg-btn" onclick="progTab('volume',this)">Volume</div>
+    <div class="seg-btn" onclick="progTab('consistency',this)">Consistency</div>
   </div>
 
   <!-- OVERVIEW TAB -->
@@ -605,6 +609,26 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
     <div class="chart-card card">
       <div class="chart-hdr"><div class="chart-lbl">Volume by Muscle</div><div class="chart-sub">All time</div></div>
       <div id="muscle-vol-chart"></div>
+    </div>
+  </div>
+
+  <!-- CONSISTENCY TAB -->
+  <div id="tab-consistency" style="display:none">
+    <div class="prog-grid">
+      <div class="ps-card card"><div class="ps-lbl">Current Streak</div><div class="ps-val" id="cs-streak">0</div><div class="ps-unit">DAYS</div></div>
+      <div class="ps-card card"><div class="ps-lbl">Active Days</div><div class="ps-val" id="cs-active">0</div><div class="ps-unit">LAST 90</div></div>
+    </div>
+    <div class="chart-card card">
+      <div class="chart-hdr"><div class="chart-lbl">Training Heatmap</div><div class="chart-sub">Last 90 days</div></div>
+      <div id="consistency-heatmap" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px"></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:10px;color:var(--dim)">
+        <span>Less</span>
+        <div style="width:10px;height:10px;border-radius:3px;background:var(--surface)"></div>
+        <div style="width:10px;height:10px;border-radius:3px;background:rgba(34,197,94,0.3)"></div>
+        <div style="width:10px;height:10px;border-radius:3px;background:rgba(34,197,94,0.6)"></div>
+        <div style="width:10px;height:10px;border-radius:3px;background:var(--green)"></div>
+        <span>More</span>
+      </div>
     </div>
   </div>
 </div>
@@ -1121,18 +1145,27 @@ function refreshHome(){
   document.getElementById('today-count').textContent='⚡ '+(tmpl.ex.length||'?')+' exercises';
   document.getElementById('today-emoji').textContent=tmpl.i;
 
-  // AI nudge — now more prominent
-  const aiEl=document.getElementById('ai-text');
-  if(DB.workouts.length===0){aiEl.innerHTML='<strong>AI Coach:</strong> Log your first workout to unlock personalized coaching!';}
-  else{
-    const topEx=getTopEx();
-    const newW=topEx?((DB.prs[topEx]?.w||0)+2.5):null;
-    const lastWo = [...DB.workouts].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
-    const lastVol = lastWo ? calcVol(lastWo) : 0;
-    aiEl.innerHTML=topEx
-      ?`<strong>Progressive Overload:</strong> Try ${newW}${DB.settings.units} on ${topEx} today — your trend says you're ready.`
-      :'<strong>AI Coach:</strong> Building great consistency. Keep pushing!';
+  // Progress snapshot — real trend + consistency strip (no AI/chat involved)
+  const snapEl=document.getElementById('home-snap-text');
+  if(DB.workouts.length===0){
+    snapEl.innerHTML='Log your first workout to start tracking trends.';
+  } else {
+    const now2=new Date();
+    const thisWeekStart=new Date(now2); thisWeekStart.setDate(thisWeekStart.getDate()-6);
+    const lastWeekStart=new Date(now2); lastWeekStart.setDate(lastWeekStart.getDate()-13);
+    const lastWeekEnd=new Date(now2); lastWeekEnd.setDate(lastWeekEnd.getDate()-7);
+    const thisWeekVol=DB.workouts.filter(w=>new Date(w.date)>=thisWeekStart).reduce((s,w)=>s+calcVol(w),0);
+    const lastWeekVol=DB.workouts.filter(w=>{const d=new Date(w.date);return d>=lastWeekStart&&d<=lastWeekEnd;}).reduce((s,w)=>s+calcVol(w),0);
+    if(lastWeekVol>0){
+      const pct=Math.round((thisWeekVol-lastWeekVol)/lastWeekVol*100);
+      snapEl.innerHTML=pct>=0
+        ?`<strong style="color:var(--green)">▲ ${pct}%</strong> volume vs last week — ${fmtN(thisWeekVol)}${DB.settings.units} so far.`
+        :`<strong style="color:var(--amber)">▼ ${Math.abs(pct)}%</strong> volume vs last week — ${fmtN(thisWeekVol)}${DB.settings.units} so far.`;
+    } else {
+      snapEl.innerHTML=`${fmtN(thisWeekVol)}${DB.settings.units} logged this week.`;
+    }
   }
+  renderHeatStrip('home-heat-strip',28);
 
   // Recent list
   const recent=[...DB.workouts].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,3);
@@ -1789,7 +1822,7 @@ function refreshProgress(){
   if(!prs.length){ spEl.innerHTML='<div class="empty"><div class="empty-icon">💪</div><div class="empty-title">No PRs yet</div><div class="empty-sub">Log sets to track your strength</div></div>'; }
   else {
     spEl.innerHTML=prs.map(([name,pr])=>`
-      <div class="pr-item card">
+      <div class="pr-item card" onclick="showExDetail('${name.replace(/'/g,"\\'")}')" style="cursor:pointer">
         <div class="pr-name">${name}</div>
         <div class="pr-badges">
           <span class="badge badge-amber">👑 ${pr.w}kg × ${pr.r}</span>
@@ -1838,9 +1871,10 @@ function renderSparkline(id,vals,max){
 }
 
 function progTab(tab,el){
-  ['overview','strength','volume'].forEach(t=>document.getElementById('tab-'+t).style.display=t===tab?'block':'none');
+  ['overview','strength','volume','consistency'].forEach(t=>document.getElementById('tab-'+t).style.display=t===tab?'block':'none');
   document.querySelectorAll('#prog-seg .seg-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
+  if(tab==='consistency') renderConsistencyTab();
 }
 
 // ===== PLAN =====
@@ -2343,6 +2377,105 @@ function renderMuscleHeatmap(){
     <rect x="53" y="98" width="17" height="46" rx="7" fill="${heatColor(catVol.Legs)}" stroke="#333" stroke-width="1"/>
     <!-- Calves --><rect x="31" y="146" width="15" height="28" rx="6" fill="${heatColor(catVol.Legs)}" stroke="#333" stroke-width="1" opacity=".7"/>
     <rect x="54" y="146" width="15" height="28" rx="6" fill="${heatColor(catVol.Legs)}" stroke="#333" stroke-width="1" opacity=".7"/>`;
+}
+
+// ===== PER-EXERCISE PROGRESS =====
+function getExerciseHistory(name){
+  const pts=[];
+  [...DB.workouts].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(w=>{
+    const ex=(w.exercises||[]).find(e=>e.name===name);
+    if(!ex)return;
+    const done=(ex.sets||[]).filter(s=>s.done&&(parseFloat(s.w)||0)>0);
+    if(!done.length)return;
+    const top=done.reduce((a,b)=>{
+      const e1a=(parseFloat(a.w)||0)*(1+(parseInt(a.r)||0)/30);
+      const e1b=(parseFloat(b.w)||0)*(1+(parseInt(b.r)||0)/30);
+      return e1b>e1a?b:a;
+    });
+    const w_=parseFloat(top.w)||0, r_=parseInt(top.r)||0;
+    pts.push({date:w.date, w:w_, r:r_, e1rm:Math.round(w_*(1+r_/30))});
+  });
+  return pts;
+}
+
+function showExDetail(name){
+  const pts=getExerciseHistory(name);
+  if(!pts.length){ showToast('No history yet for '+name); return; }
+  const vw=300, vh=140, pad=12;
+  const maxV=Math.max(...pts.map(p=>p.e1rm))*1.15||1;
+  const stepX=pts.length>1?(vw-2*pad)/(pts.length-1):0;
+  const toY=v=>vh-pad-(v/maxV)*(vh-2*pad);
+  const xOf=i=>pts.length>1?pad+i*stepX:vw/2;
+  const e1Line=pts.map((p,i)=>`${xOf(i)},${toY(p.e1rm)}`).join(' ');
+  const wLine=pts.map((p,i)=>`${xOf(i)},${toY(p.w)}`).join(' ');
+  const dots=pts.map((p,i)=>`<circle cx="${xOf(i)}" cy="${toY(p.e1rm)}" r="3" fill="var(--green)"/><circle cx="${xOf(i)}" cy="${toY(p.w)}" r="3" fill="var(--blue)"/>`).join('');
+  const svg=`<svg viewBox="0 0 ${vw} ${vh}" style="width:100%;height:140px;display:block">
+    <polyline points="${e1Line}" fill="none" stroke="var(--green)" stroke-width="2"/>
+    <polyline points="${wLine}" fill="none" stroke="var(--blue)" stroke-width="2"/>
+    ${dots}
+  </svg>`;
+  const bestW=Math.max(...pts.map(p=>p.w)), bestE1=Math.max(...pts.map(p=>p.e1rm));
+  const content=`
+    <div style="display:flex;gap:14px;margin-bottom:10px">
+      <span class="badge badge-blue">● Weight</span>
+      <span class="badge badge-green">● Est 1RM</span>
+    </div>
+    <div class="card" style="padding:14px">
+      ${svg}
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px"><span>${fmtDate(pts[0].date)}</span><span>${fmtDate(pts[pts.length-1].date)}</span></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <div class="card" style="flex:1;padding:12px;text-align:center"><div style="font-size:11px;color:var(--muted)">Best Weight</div><div style="font-size:18px;font-weight:800;color:var(--blue)">${bestW}kg</div></div>
+      <div class="card" style="flex:1;padding:12px;text-align:center"><div style="font-size:11px;color:var(--muted)">Best Est 1RM</div><div style="font-size:18px;font-weight:800;color:var(--green)">${bestE1}kg</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--dim);margin-top:10px;text-align:center">${pts.length} session${pts.length===1?'':'s'} logged</div>`;
+  document.body.appendChild(mkSheet(name, content));
+}
+
+// ===== CONSISTENCY HEATMAP =====
+function getDailyVolMap(days){
+  const map={};
+  const cutoff=new Date(); cutoff.setDate(cutoff.getDate()-days);
+  DB.workouts.forEach(w=>{
+    const d=new Date(w.date);
+    if(d<cutoff)return;
+    const k=dKey(d);
+    map[k]=(map[k]||0)+calcVol(w);
+  });
+  return map;
+}
+function heatCellColor(v,max){
+  if(!v)return'var(--surface)';
+  const ratio=Math.min(v/max,1);
+  if(ratio<0.34)return'rgba(34,197,94,0.3)';
+  if(ratio<0.67)return'rgba(34,197,94,0.6)';
+  return'var(--green)';
+}
+function renderHeatStrip(elId,days){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  const map=getDailyVolMap(days);
+  const max=Math.max(...Object.values(map),1);
+  const cells=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const v=map[dKey(d)]||0;
+    cells.push(`<div title="${dKey(d)}: ${fmtN(v)}${DB.settings.units}" style="flex:1;aspect-ratio:1;border-radius:3px;background:${heatCellColor(v,max)}"></div>`);
+  }
+  el.innerHTML=cells.join('');
+}
+function renderConsistencyTab(){
+  document.getElementById('cs-streak').textContent=calcStreak();
+  const map=getDailyVolMap(90);
+  document.getElementById('cs-active').textContent=Object.keys(map).length;
+  const max=Math.max(...Object.values(map),1);
+  const cells=[];
+  for(let i=89;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const v=map[dKey(d)]||0;
+    cells.push(`<div title="${dKey(d)}: ${fmtN(v)}${DB.settings.units}" style="width:9.5%;aspect-ratio:1;border-radius:3px;background:${heatCellColor(v,max)}"></div>`);
+  }
+  document.getElementById('consistency-heatmap').innerHTML=cells.join('');
 }
 
 // ===== HELPERS =====
