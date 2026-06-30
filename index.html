@@ -26,6 +26,11 @@
   --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
   --shadow-card: 0 1px 2px rgba(0,0,0,.24), 0 8px 24px -8px rgba(0,0,0,.5);
   --shadow-elevated: 0 4px 12px rgba(0,0,0,.3), 0 16px 40px -12px rgba(0,0,0,.6);
+  /* premium home v2 tokens */
+  --glass-bg: rgba(255,255,255,0.045);
+  --glass-border: rgba(255,255,255,0.08);
+  --hero-grad: linear-gradient(145deg,#1A3D8F 0%,#1E50C4 38%,#2F6BE0 72%,#3B82F6 100%);
+  --hero-glow: 0 20px 50px -16px rgba(37,99,235,0.55), 0 2px 0 rgba(255,255,255,0.06) inset;
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -35,7 +40,7 @@
 html{height:100%;height:100dvh;background:var(--bg)}
 body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Inter',sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
 #app{height:100%;height:100dvh;display:flex;flex-direction:column;position:relative;overflow:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-.screen{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:90px;-webkit-overflow-scrolling:touch}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:104px;-webkit-overflow-scrolling:touch}
 .screen.entering{animation:screenSlideIn .32s cubic-bezier(0.34,0.85,0.4,1) both}
 .screen.entering-back{animation:screenSlideInBack .32s cubic-bezier(0.34,0.85,0.4,1) both}
 @keyframes screenSlideIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
@@ -45,18 +50,20 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 
 
 /* NAV */
-.bottom-nav{position:absolute;bottom:0;left:0;right:0;background:rgba(10,10,11,0.97);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-top:1px solid rgba(255,255,255,0.07);display:flex;padding:8px 0 22px;z-index:100}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 0;transition:opacity .15s,transform .15s var(--spring);min-height:44px;justify-content:center}
-.nav-item:active{opacity:.5;transform:scale(.94)}
-.nav-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center}
-.nav-icon svg{width:25px;height:25px;stroke:var(--dim);stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:stroke .25s var(--ease)}
-.nav-item.active .nav-icon svg{stroke:var(--blue)}
+.bottom-nav{position:absolute;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:rgba(20,20,24,0.62);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:1px solid var(--glass-border);border-radius:28px;display:flex;padding:9px 6px;z-index:100;box-shadow:0 14px 36px -10px rgba(0,0,0,.6),0 1px 0 rgba(255,255,255,.05) inset}
+.nav-item{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:8px 0 6px;transition:opacity .15s,transform .15s var(--spring);min-height:44px;justify-content:center;border-radius:18px}
+.nav-item:active{opacity:.6;transform:scale(.92)}
+.nav-icon{position:relative;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .28s var(--ease)}
+.nav-item.active .nav-icon{background:var(--blue-dim);box-shadow:0 0 0 1px rgba(59,130,246,0.25),0 0 16px rgba(59,130,246,0.35)}
+.nav-icon svg{position:relative;z-index:1;width:22px;height:22px;stroke:var(--dim);stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:stroke .25s var(--ease)}
+.nav-item.active .nav-icon svg{stroke:var(--blue-light)}
 .nav-label{font-size:10px;font-weight:600;color:var(--dim);transition:color .25s var(--ease);letter-spacing:.02em}
-.nav-item.active .nav-label{color:var(--blue)}
-.nav-center{flex:1;display:flex;justify-content:center;align-items:center}
-.fab{width:54px;height:54px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:300;box-shadow:0 4px 20px var(--blue-glow),0 1px 3px rgba(0,0,0,.3);cursor:pointer;transition:transform .18s var(--spring),box-shadow .18s;line-height:1;padding-bottom:2px;-webkit-tap-highlight-color:transparent}
+.nav-item.active .nav-label{color:var(--blue-light)}
+.nav-center{flex:0 0 60px;display:flex;justify-content:center;align-items:center}
+.fab{width:52px;height:52px;background:linear-gradient(150deg,var(--blue-light),var(--blue) 65%,#2563EB);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;font-weight:300;box-shadow:0 6px 18px var(--blue-glow),0 0 0 1px rgba(255,255,255,.08) inset;cursor:pointer;transition:transform .18s var(--spring),box-shadow .18s;line-height:1;padding-bottom:2px;-webkit-tap-highlight-color:transparent;animation:fab-breathe 3.4s ease-in-out infinite}
 .fab:active{transform:scale(.86);box-shadow:0 2px 10px var(--blue-glow)}
 .fab.pulse{animation:fab-pulse 2.2s ease-in-out infinite}
+@keyframes fab-breathe{0%,100%{box-shadow:0 6px 18px var(--blue-glow),0 0 0 1px rgba(255,255,255,.08) inset}50%{box-shadow:0 6px 22px rgba(59,130,246,.62),0 0 0 7px rgba(59,130,246,.07),0 0 0 1px rgba(255,255,255,.08) inset}}
 @keyframes fab-pulse{0%,100%{box-shadow:0 4px 20px var(--blue-glow),0 1px 3px rgba(0,0,0,.3)}50%{box-shadow:0 4px 28px rgba(59,130,246,0.55),0 0 0 8px rgba(59,130,246,0.09)}}
 
 /* CARDS */
@@ -166,52 +173,99 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 .ob-feat-name{font-size:15px;font-weight:700;margin-bottom:2px}
 .ob-feat-desc{font-size:13px;color:var(--muted)}
 
-/* ======== HOME ======== */
+/* ======== HOME v2 — premium ======== */
 #home-screen{display:none}
-.home-header{padding:22px 18px 16px;display:flex;justify-content:space-between;align-items:flex-start}
-.greet-sub{font-size:14px;color:var(--muted);margin-bottom:3px;font-weight:500;letter-spacing:-.1px}
-.greet-name{font-size:30px;font-weight:800;letter-spacing:-.7px}
-.icon-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card);border:1px solid rgba(255,255,255,0.06);transition:transform .15s var(--spring),opacity .15s}
-.icon-btn:active{transform:scale(.9);opacity:.7}
-.icon-btn svg{width:19px;height:19px;stroke:var(--muted);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--blue),#6366F1);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;cursor:pointer;flex-shrink:0;box-shadow:0 0 0 2px rgba(59,130,246,0.25);transition:transform .15s var(--spring)}
+.home-header{padding:20px 16px 18px;display:flex;justify-content:space-between;align-items:flex-start;animation:hFadeIn .5s var(--ease) both}
+.greet-block{display:flex;flex-direction:column;gap:6px;min-width:0}
+.greet-sub{font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.01em}
+.greet-name{font-size:28px;font-weight:800;letter-spacing:-.8px;line-height:1.05}
+.greet-date{font-size:11.5px;color:var(--dim);font-weight:600;letter-spacing:.02em;text-transform:uppercase}
+.greet-quote{font-size:12.5px;color:var(--blue-light);font-weight:600;font-style:italic;margin-top:2px;opacity:.9;max-width:240px}
+.header-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.glass-btn{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .16s var(--spring),background .16s;box-shadow:var(--shadow-sm)}
+.glass-btn:active{transform:scale(.9);background:rgba(255,255,255,0.08)}
+.glass-btn svg{width:18px;height:18px;stroke:var(--text-secondary);stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+@keyframes bell-bounce{0%,100%{transform:rotate(0)}20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-6deg)}80%{transform:rotate(4deg)}}
+.glass-btn:active svg{animation:bell-bounce .5s var(--ease)}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--blue-light),var(--blue) 60%,#6366F1);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;cursor:pointer;flex-shrink:0;box-shadow:0 0 0 2px rgba(59,130,246,0.28),0 4px 14px rgba(59,130,246,.25);transition:transform .15s var(--spring)}
 .avatar:active{transform:scale(.92)}
-.today-card{margin:0 16px 12px;overflow:hidden;position:relative;cursor:pointer;background:linear-gradient(150deg,rgba(59,130,246,0.16),rgba(99,102,241,0.07) 60%),var(--card);border:1px solid rgba(59,130,246,0.22);transition:transform .2s var(--spring),opacity .15s,box-shadow .2s;box-shadow:var(--shadow-card)}
-.today-card:active{transform:scale(.98);opacity:.95}
-.today-inner{padding:20px 20px 18px;position:relative;z-index:1}
-.today-tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-light);margin-bottom:7px;opacity:.95;display:flex;align-items:center;gap:6px}
-.today-name{font-size:26px;font-weight:800;letter-spacing:-.6px;margin-bottom:8px}
-.today-meta{display:flex;gap:16px;margin-bottom:16px}
-.today-meta span{font-size:13px;color:var(--text-secondary);display:inline-flex;align-items:center;gap:5px;font-weight:500}
-.today-meta svg{width:13px;height:13px;stroke:var(--text-secondary);stroke-width:2;fill:none;flex-shrink:0}
-.today-emoji{position:absolute;right:-6px;top:-6px;width:140px;height:140px;opacity:.07;z-index:0;color:var(--blue-light)}
-.today-emoji svg{width:100%;height:100%;stroke-width:1.1}
 
-/* weekly ring */
-.consistency-ring{position:relative;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
-.ring-track{fill:none;stroke:rgba(255,255,255,0.06);stroke-width:5}
-.ring-fill{fill:none;stroke:var(--blue);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 1s var(--spring-bounce)}
-.ring-center-text{position:absolute;font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.3px}
-.ring-center-sub{position:absolute;top:38px;font-size:8px;color:var(--muted);text-align:center;line-height:1.1;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+/* HERO — Today's Workout */
+.today-card{margin:4px 16px 18px;min-height:236px;overflow:hidden;position:relative;cursor:pointer;border-radius:28px;background:var(--hero-grad);border:1px solid rgba(255,255,255,0.10);transition:transform .22s var(--spring),opacity .15s;box-shadow:var(--hero-glow);animation:heroSlideUp .55s var(--ease) .05s both}
+.today-card:active{transform:scale(.985)}
+.today-card::before{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 110% -10%,rgba(255,255,255,.22),transparent 55%);pointer-events:none}
+.today-card::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.10) 45%,transparent 60%);background-size:240% 100%;animation:heroShimmer 5.5s ease-in-out infinite;pointer-events:none}
+@keyframes heroShimmer{0%{background-position:160% 0}55%,100%{background-position:-60% 0}}
+@keyframes heroSlideUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.today-inner{padding:22px 22px 20px;position:relative;z-index:1;display:flex;flex-direction:column;height:100%}
+.today-focus-badge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#EAF1FF;background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.20);padding:6px 12px 6px 10px;border-radius:20px;margin-bottom:14px;backdrop-filter:blur(6px)}
+.today-focus-badge svg{width:12px;height:12px;stroke:#EAF1FF;stroke-width:2.4;fill:none}
+.today-tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.7);margin-bottom:6px}
+.today-name{font-size:30px;font-weight:800;letter-spacing:-.8px;margin-bottom:10px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.18)}
+.today-meta{display:flex;gap:18px;margin-bottom:auto;padding-bottom:18px}
+.today-meta span{font-size:13px;color:rgba(255,255,255,.88);display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.today-meta svg{width:14px;height:14px;stroke:rgba(255,255,255,.88);stroke-width:2;fill:none;flex-shrink:0}
+.today-card .btn-primary{background:rgba(255,255,255,0.97);color:#1640B8;box-shadow:0 8px 22px rgba(0,0,0,.28),0 0 0 1px rgba(255,255,255,.5) inset;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;max-width:none!important;font-size:15px;letter-spacing:-.1px}
+.today-card .btn-primary:active{transform:scale(.97)}
+.today-card .btn-primary svg{width:16px;height:16px;stroke:#1640B8;stroke-width:2.6;fill:none;transition:transform .2s var(--spring)}
+.today-card .btn-primary:active svg{transform:translateX(3px)}
+.today-emoji{position:absolute;right:-18px;top:-14px;width:190px;height:190px;opacity:.10;z-index:0;font-size:170px;line-height:1;display:flex;align-items:center;justify-content:center;filter:saturate(0) brightness(2.4);pointer-events:none}
 
-/* activity card (replaces old stats-grid + snapshot card) */
-.activity-card{margin:0 16px 12px;padding:18px;cursor:pointer;transition:transform .2s var(--spring),opacity .15s,box-shadow .2s}
-.activity-card:active{transform:scale(.98);opacity:.93}
-.activity-row{display:flex;align-items:center;gap:18px}
-.activity-stats{flex:1;display:flex;flex-direction:column;gap:11px}
-.activity-stat{display:flex;align-items:baseline;justify-content:space-between}
-.activity-stat-lbl{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:-.1px}
-.activity-stat-val{font-size:16px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-.2px}
-.activity-heat-wrap{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06)}
+/* STATS — 2x2 premium grid */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 16px 18px;animation:hFadeIn .55s var(--ease) .12s both}
+.stat-card{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:16px;box-shadow:var(--shadow-card);transition:transform .18s var(--spring),border-color .18s;cursor:pointer;position:relative;overflow:hidden;min-height:104px;display:flex;flex-direction:column}
+.stat-card:active{transform:scale(.96)}
+.stat-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.stat-icon{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon svg{width:16px;height:16px;stroke-width:2.1;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.stat-icon.amber{background:var(--amber-dim)} .stat-icon.amber svg{stroke:var(--amber)}
+.stat-icon.blue{background:var(--blue-dim)} .stat-icon.blue svg{stroke:var(--blue-light)}
+.stat-icon.green{background:var(--green-dim)} .stat-icon.green svg{stroke:var(--green)}
+.stat-lbl{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.01em}
+.stat-val{font-size:25px;font-weight:800;letter-spacing:-.6px;color:var(--text);font-variant-numeric:tabular-nums;line-height:1}
+.stat-sub{font-size:11px;color:var(--dim);font-weight:600;margin-top:5px}
+.stat-bar-track{height:4px;border-radius:3px;background:rgba(255,255,255,.07);margin-top:10px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--blue-light));width:0%;transition:width 1s var(--spring-bounce)}
+.stat-pr-name{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat-pr-val{font-size:11px;color:var(--amber);font-weight:700;margin-top:2px}
+.stat-mini-ring{position:relative;width:30px;height:30px}
+.consistency-ring{position:relative;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:54px;height:54px}
+.consistency-ring svg{width:100%;height:100%}
+.ring-track{fill:none;stroke:rgba(255,255,255,0.08);stroke-width:5}
+.ring-fill{fill:none;stroke:var(--amber);stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 1s var(--spring-bounce)}
+.ring-center-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.4px;font-variant-numeric:tabular-nums}
+
+/* WEEKLY ACTIVITY */
+.week-card{margin:0 16px 18px;padding:18px 18px 16px;animation:hFadeIn .55s var(--ease) .18s both}
+.week-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.week-card-title{font-size:15px;font-weight:800;letter-spacing:-.2px}
+.week-goal-pill{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:5px 10px 5px 6px}
+.week-mini-ring{position:relative;width:24px;height:24px;flex-shrink:0}
+.wk-ring-track{fill:none;stroke:rgba(255,255,255,0.1);stroke-width:3}
+.wk-ring-fill{fill:none;stroke:var(--blue-light);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .8s var(--spring-bounce)}
+.week-goal-text{font-size:11.5px;font-weight:700;color:var(--text-secondary)}
+.week-bars{display:flex;justify-content:space-between;align-items:flex-end;height:96px;gap:8px;margin-bottom:8px}
+.week-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:8px}
+.week-bar-track{width:100%;max-width:26px;flex:1;display:flex;align-items:flex-end;border-radius:8px;background:rgba(255,255,255,.04);overflow:hidden}
+.week-bar-fill{width:100%;border-radius:8px;background:var(--surface-elevated);min-height:6px;transition:height .8s var(--spring-bounce),background .3s}
+.week-bar-fill.done{background:linear-gradient(180deg,var(--blue-light),var(--blue));box-shadow:0 0 14px rgba(59,130,246,.45)}
+.week-bar-fill.today{background:linear-gradient(180deg,#fff,var(--blue-light));box-shadow:0 0 16px rgba(96,165,250,.6)}
+.week-day-lbl{font-size:10.5px;font-weight:700;color:var(--dim);letter-spacing:.02em}
+.week-day-lbl.is-today{color:var(--blue-light)}
+
+/* SNAPSHOT trend strip (kept under recent / or merged) */
+.snap-strip{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06)}
 
 /* circular quick actions */
-.qa-row{display:flex;justify-content:space-around;margin:0 16px 22px}
+.qa-row{display:flex;justify-content:space-around;margin:0 16px 22px;animation:hFadeIn .55s var(--ease) .24s both}
 .qa-circle{display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.qa-circle-icon{width:52px;height:52px;border-radius:50%;background:var(--card);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;transition:transform .18s var(--spring),background .18s,border-color .18s;box-shadow:var(--shadow-sm)}
-.qa-circle-icon svg{width:21px;height:21px;stroke:var(--text-secondary);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:stroke .18s}
+.qa-circle-icon{width:52px;height:52px;border-radius:18px;background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;transition:transform .18s var(--spring),background .18s,border-color .18s;box-shadow:var(--shadow-sm)}
+.qa-circle-icon svg{width:20px;height:20px;stroke:var(--text-secondary);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:stroke .18s}
 .qa-circle:active .qa-circle-icon{transform:scale(.88);background:var(--blue-dim);border-color:rgba(59,130,246,0.3)}
 .qa-circle:active .qa-circle-icon svg{stroke:var(--blue)}
 .qa-circle-lbl{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:-.1px}
+
+@keyframes hFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
 /* ======== WORKOUT ======== */
 #workout-screen{display:none}
@@ -332,6 +386,18 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 .h-info{flex:1;min-width:0}
 .h-name{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.2px}
 .h-meta{font-size:13px;color:var(--muted);margin-top:3px}
+
+/* home-only polish for recent workout rows (history screen keeps original look) */
+.home-sec-hdr{display:flex;align-items:center;justify-content:space-between;margin:6px 16px 10px;padding:0 2px}
+.home-sec-hdr .sec-title{margin:0;padding:0}
+.home-sec-hdr .sec-link{font-size:13px;font-weight:700;color:var(--blue-light);cursor:pointer}
+#home-recent .h-item{background:var(--card);border-radius:18px;border:1px solid rgba(255,255,255,0.06);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+#home-recent .h-item:active{transform:scale(.97);background:var(--surface-elevated)}
+#home-recent .h-icon{width:46px;height:46px;font-size:19px;background:linear-gradient(150deg,var(--blue-dim),rgba(99,102,241,0.10))}
+#home-recent .h-name{font-size:15px}
+#home-recent .row-right{font-size:18px;opacity:.5}
+#home-recent .empty{padding:40px 28px}
+#home-recent .empty-icon{font-size:38px;opacity:.7;width:64px;height:64px;border-radius:18px;background:var(--glass-bg);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;margin:0 auto}
 
 /* ======== PROFILE ======== */
 #profile-screen{display:none}
@@ -503,42 +569,111 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 <!-- HOME -->
 <div id="home-screen" class="screen">
   <div class="home-header">
-    <div><div class="greet-sub" id="greet-time">Good Morning,</div><div class="greet-name" id="greet-name">Saurav 👋</div></div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="font-size:22px;cursor:pointer" onclick="showToast('No new notifications 🔕')">🔔</div>
+    <div class="greet-block">
+      <div class="greet-sub" id="greet-time">Good Morning,</div>
+      <div class="greet-name" id="greet-name">Saurav</div>
+      <div class="greet-date" id="greet-date">—</div>
+      <div class="greet-quote" id="greet-quote">Discipline beats motivation.</div>
+    </div>
+    <div class="header-actions">
+      <div class="glass-btn" onclick="showToast('No new notifications')">
+        <svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 19a2 2 0 004 0"/></svg>
+      </div>
       <div class="avatar" id="home-avatar" onclick="navTo('profile')">S</div>
     </div>
   </div>
 
   <!-- TODAY CARD -->
-  <div class="today-card card" id="today-card">
+  <div class="today-card" id="today-card" onclick="startWorkoutFromHome()">
     <div class="today-inner">
+      <div class="today-focus-badge" id="today-focus-badge">
+        <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2L12 16.4 5.7 21l2.3-7.2-6-4.6h7.6z"/></svg>
+        <span id="today-focus-tag">Today's Focus</span>
+      </div>
       <div class="today-tag">Today's Workout</div>
       <div class="today-name" id="today-name">Push Day</div>
-      <div class="today-meta"><span id="today-time">⏱ 65 min</span><span id="today-count">⚡ 5 exercises</span></div>
-      <button class="btn btn-primary" style="max-width:196px;font-size:14px;padding:11px 16px" onclick="startWorkoutFromHome()">Start Workout →</button>
+      <div class="today-meta">
+        <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span id="today-time">65 min</span></span>
+        <span><svg viewBox="0 0 24 24"><path d="M7 7h10M7 12h10M7 17h6"/></svg><span id="today-count">5 exercises</span></span>
+      </div>
+      <button class="btn btn-primary" onclick="event.stopPropagation();startWorkoutFromHome()">Start Workout
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
     </div>
     <div class="today-emoji" id="today-emoji">🏋️</div>
   </div>
 
-  <!-- ACTIVITY (ring + key stats + heat strip) -->
-  <div class="card activity-card" id="home-snapshot" onclick="navTo('progress')">
-    <div class="activity-row">
-      <div class="consistency-ring">
-        <svg width="64" height="64" viewBox="0 0 64 64">
-          <circle class="ring-track" cx="32" cy="32" r="27"/>
-          <circle class="ring-fill" id="h-ring" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6" transform="rotate(-90 32 32)"/>
-        </svg>
-        <div class="ring-center-text" id="h-streak">0</div>
-        <div class="ring-center-sub">streak</div>
+  <!-- TODAY'S PERFORMANCE — 2x2 stat grid -->
+  <div class="stats-grid">
+    <div class="stat-card" onclick="navTo('progress')">
+      <div class="stat-card-top">
+        <div class="stat-icon amber"><svg viewBox="0 0 24 24"><path d="M12 2c1 4-4 5-4 9a4 4 0 008 0c0-1.5-1-2.5-1-2.5 1 3-1 4-1 4 .5-2-2-4-2-6.5C12 4.5 12 2 12 2z"/></svg></div>
+        <span class="stat-lbl">Streak</span>
       </div>
-      <div class="activity-stats">
-        <div class="activity-stat"><span class="activity-stat-lbl">Volume this month</span><span class="activity-stat-val" id="h-vol">0</span></div>
-        <div class="activity-stat"><span class="activity-stat-lbl">Workouts logged</span><span class="activity-stat-val" id="h-count">0</span></div>
-        <div class="activity-stat" id="home-pr-row" style="display:none"><span class="activity-stat-lbl">👑 Top PR</span><span class="activity-stat-val" id="h-pr-val" style="color:var(--amber)">—</span></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="consistency-ring">
+          <svg width="64" height="64" viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="27"/>
+            <circle class="ring-fill" id="h-ring" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6" transform="rotate(-90 32 32)"/>
+          </svg>
+          <div class="ring-center-text" id="h-streak">0</div>
+        </div>
+        <div class="stat-sub" style="margin-top:0">days in a row</div>
       </div>
     </div>
-    <div class="activity-heat-wrap">
+
+    <div class="stat-card" onclick="navTo('progress')">
+      <div class="stat-card-top">
+        <div class="stat-icon blue"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-9"/><path d="M14 7h6v6"/></svg></div>
+        <span class="stat-lbl">Monthly Volume</span>
+      </div>
+      <div class="stat-val" id="h-vol">0</div>
+      <div class="stat-bar-track"><div class="stat-bar-fill" id="vol-bar-fill"></div></div>
+    </div>
+
+    <div class="stat-card" id="home-pr-row" style="display:none" onclick="navTo('progress')">
+      <div class="stat-card-top">
+        <div class="stat-icon amber"><svg viewBox="0 0 24 24"><path d="M6 4h12l-1 6a5 5 0 01-10 0L6 4z"/><path d="M9 20h6M12 15v5"/></svg></div>
+        <span class="stat-lbl">Best PR</span>
+      </div>
+      <div class="stat-pr-name" id="h-pr-val">—</div>
+      <div class="stat-pr-val" id="h-pr-sub">Personal record</div>
+    </div>
+
+    <div class="stat-card" onclick="navTo('history')">
+      <div class="stat-card-top">
+        <div class="stat-icon green"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
+        <span class="stat-lbl">Total Workouts</span>
+      </div>
+      <div class="stat-val" id="h-count">0</div>
+      <div class="stat-sub">all time</div>
+    </div>
+  </div>
+
+  <!-- THIS WEEK -->
+  <div class="card week-card">
+    <div class="week-card-hdr">
+      <div class="week-card-title">This Week</div>
+      <div class="week-goal-pill">
+        <div class="week-mini-ring">
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <circle class="wk-ring-track" cx="12" cy="12" r="10"/>
+            <circle class="wk-ring-fill" id="wk-goal-ring" cx="12" cy="12" r="10" stroke-dasharray="62.8" stroke-dashoffset="62.8" transform="rotate(-90 12 12)"/>
+          </svg>
+        </div>
+        <span class="week-goal-text" id="wk-goal-text">0 / 5 sessions</span>
+      </div>
+    </div>
+    <div class="week-bars" id="week-bars">
+      <div class="week-bar-col"><div class="week-bar-track"><div class="week-bar-fill" id="wk-bar-0"></div></div><div class="week-day-lbl" id="wk-lbl-0">M</div></div>
+      <div class="week-bar-col"><div class="week-bar-track"><div class="week-bar-fill" id="wk-bar-1"></div></div><div class="week-day-lbl" id="wk-lbl-1">T</div></div>
+      <div class="week-bar-col"><div class="week-bar-track"><div class="week-bar-fill" id="wk-bar-2"></div></div><div class="week-day-lbl" id="wk-lbl-2">W</div></div>
+      <div class="week-bar-col"><div class="week-bar-track"><div class="week-bar-fill" id="wk-bar-3"></div></div><div class="week-day-lbl" id="wk-lbl-3">T</div></div>
+      <div class="week-bar-col"><div class="week-bar-track"><div class="week-bar-fill" id="wk-bar-4"></div></div><div class="week-day-lbl" id="wk-lbl-4">F</div></div>
+      <div class="week-bar-col"><div class="week-bar-track"><div class="week-bar-fill" id="wk-bar-5"></div></div><div class="week-day-lbl" id="wk-lbl-5">S</div></div>
+      <div class="week-bar-col"><div class="week-bar-track"><div class="week-bar-fill" id="wk-bar-6"></div></div><div class="week-day-lbl" id="wk-lbl-6">S</div></div>
+    </div>
+    <div class="snap-strip">
       <div id="home-snap-text" style="font-size:12px;color:var(--muted);margin-bottom:8px">Log your first workout to start tracking trends.</div>
       <div id="home-heat-strip" style="display:flex;gap:4px"></div>
     </div>
@@ -546,14 +681,15 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 
   <!-- QUICK ACTIONS -->
   <div class="qa-row">
-    <div class="qa-circle" onclick="event.stopPropagation();navTo('progress')"><div class="qa-circle-icon">📈</div><div class="qa-circle-lbl">Progress</div></div>
-    <div class="qa-circle" onclick="event.stopPropagation();navTo('history')"><div class="qa-circle-icon">🕓</div><div class="qa-circle-lbl">History</div></div>
-    <div class="qa-circle" onclick="event.stopPropagation();navTo('bodystats')"><div class="qa-circle-icon">📏</div><div class="qa-circle-lbl">Body Stats</div></div>
+    <div class="qa-circle" onclick="navTo('progress')"><div class="qa-circle-icon"><svg viewBox="0 0 24 24"><path d="M3 17l5-5 4 4 8-9"/><path d="M14 7h6v6"/></svg></div><div class="qa-circle-lbl">Progress</div></div>
+    <div class="qa-circle" onclick="navTo('history')"><div class="qa-circle-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2"/></svg></div><div class="qa-circle-lbl">History</div></div>
+    <div class="qa-circle" onclick="navTo('bodystats')"><div class="qa-circle-icon"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M8 7v4M12 7v6M16 7v4"/></svg></div><div class="qa-circle-lbl">Body Stats</div></div>
   </div>
 
-  <div class="sec-title" style="margin-top:6px">Recent Workouts</div>
+  <div class="home-sec-hdr"><div class="sec-title" style="margin:0">Recent Workouts</div></div>
   <div id="home-recent"></div>
 </div>
+
 
 <!-- WORKOUT -->
 <div id="workout-screen" class="screen">
@@ -3011,6 +3147,97 @@ function registerOfflineSW(){
     navigator.serviceWorker.register(swUrl).catch(()=>{});
   }catch(e){}
 }
+
+// ===== HOME v2 ENHANCEMENTS (additive only — wraps refreshHome, doesn't modify it) =====
+(function(){
+  const QUOTES = [
+    "Discipline beats motivation.",
+    "Show up. That's the rep that counts.",
+    "Strong today, stronger tomorrow.",
+    "Consistency compounds.",
+    "Small reps, big results.",
+    "Train like today is the test.",
+    "Progress, not perfection.",
+    "The weights don't lift themselves."
+  ];
+  function dailyQuote(){
+    const dayIdx = Math.floor(Date.now()/86400000);
+    return QUOTES[((dayIdx % QUOTES.length) + QUOTES.length) % QUOTES.length];
+  }
+  function fmtHomeDate(){
+    return new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  }
+  function renderWeekBars(){
+    const now=new Date();
+    const todayIdx=(now.getDay()+6)%7; // 0=Mon..6=Sun
+    const startOfWeek=new Date(now); startOfWeek.setDate(now.getDate()-todayIdx);
+    const vols=[]; let sessions=0, max=1;
+    for(let i=0;i<7;i++){
+      const d=new Date(startOfWeek); d.setDate(startOfWeek.getDate()+i);
+      let v=0;
+      if(typeof DB!=='undefined' && DB.workouts){
+        DB.workouts.forEach(w=>{
+          const wd=new Date(w.date);
+          if(wd.toDateString()===d.toDateString() && typeof calcVol==='function') v+=calcVol(w);
+        });
+      }
+      vols.push(v);
+      if(v>0) sessions++;
+      if(v>max) max=v;
+    }
+    vols.forEach((v,i)=>{
+      const fillEl=document.getElementById('wk-bar-'+i);
+      const lblEl=document.getElementById('wk-lbl-'+i);
+      if(!fillEl) return;
+      const pct = v>0 ? Math.max((v/max)*100, 10) : 4;
+      fillEl.style.height = pct+'%';
+      fillEl.classList.remove('done','today');
+      if(lblEl) lblEl.classList.remove('is-today');
+      if(i===todayIdx){ fillEl.classList.add('today'); if(lblEl) lblEl.classList.add('is-today'); }
+      else if(v>0){ fillEl.classList.add('done'); }
+    });
+    const goal=5;
+    const goalText=document.getElementById('wk-goal-text');
+    if(goalText) goalText.textContent = sessions+' / '+goal+' sessions';
+    const ring=document.getElementById('wk-goal-ring');
+    if(ring){
+      const circ=62.8, pct=Math.min(sessions/goal,1);
+      ring.style.strokeDashoffset = circ-(pct*circ);
+    }
+  }
+  function renderVolBar(){
+    const fill=document.getElementById('vol-bar-fill');
+    if(!fill || typeof calcMonthVol!=='function') return;
+    const goal=10000; // soft reference target for the bar's fill
+    const v=calcMonthVol();
+    const pct=Math.min((v/goal)*100,100);
+    fill.style.width=(v>0?Math.max(pct,4):0)+'%';
+  }
+  function renderFocusTag(){
+    try{
+      const dayIdx=(DB.settings.nextDayIdx||0)%6;
+      const tmpl=TEMPLATES[dayIdx];
+      const tagEl=document.getElementById('today-focus-tag');
+      if(tagEl && tmpl) tagEl.textContent = tmpl.focus || tmpl.n || "Today's Focus";
+    }catch(e){}
+  }
+  function enhanceHome(){
+    const qEl=document.getElementById('greet-quote');
+    if(qEl) qEl.textContent = dailyQuote();
+    const dEl=document.getElementById('greet-date');
+    if(dEl) dEl.textContent = fmtHomeDate();
+    renderFocusTag();
+    renderVolBar();
+    renderWeekBars();
+  }
+  if(typeof window.refreshHome==='function'){
+    const _origRefreshHome = window.refreshHome;
+    window.refreshHome = function(){
+      _origRefreshHome.apply(this, arguments);
+      enhanceHome();
+    };
+  }
+})();
 
 // ===== INIT =====
 (async function init(){
