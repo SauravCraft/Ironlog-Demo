@@ -51,8 +51,11 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 
 /* NAV */
 .bottom-nav{position:absolute;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:rgba(20,20,24,0.62);backdrop-filter:blur(28px) saturate(180%);-webkit-backdrop-filter:blur(28px) saturate(180%);border:1px solid var(--glass-border);border-radius:28px;display:flex;padding:9px 6px;z-index:100;box-shadow:0 14px 36px -10px rgba(0,0,0,.6),0 1px 0 rgba(255,255,255,.05) inset}
-.nav-item{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:8px 0 6px;transition:opacity .15s,transform .15s var(--spring);min-height:44px;justify-content:center;border-radius:18px}
-.nav-item:active{opacity:.6;transform:scale(.92)}
+.nav-indicator{position:absolute;top:9px;bottom:9px;width:0;border-radius:18px;background:radial-gradient(120% 140% at 50% 30%,rgba(59,130,246,0.20),rgba(59,130,246,0.07) 70%);box-shadow:0 0 0 1px rgba(59,130,246,0.14) inset;pointer-events:none;z-index:0;opacity:0;transition:transform .42s var(--spring-bounce),width .3s var(--ease),opacity .25s}
+.nav-item{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:8px 0 6px;transition:opacity .15s,transform .32s var(--spring-bounce);min-height:44px;justify-content:center;border-radius:18px;z-index:1}
+.nav-item:active{opacity:.6;transform:scale(.88)}
+.nav-item.active{animation:navItemPop .42s var(--spring-bounce)}
+@keyframes navItemPop{0%{transform:scale(1)}35%{transform:scale(1.14)}65%{transform:scale(.94)}100%{transform:scale(1)}}
 .nav-icon{position:relative;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .28s var(--ease)}
 .nav-item.active .nav-icon{background:var(--blue-dim);box-shadow:0 0 0 1px rgba(59,130,246,0.25),0 0 16px rgba(59,130,246,0.35)}
 .nav-icon svg{position:relative;z-index:1;width:22px;height:22px;stroke:var(--dim);stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:stroke .25s var(--ease)}
@@ -213,7 +216,8 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 
 /* STATS — 2x2 premium grid */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 16px 18px;animation:hFadeIn .55s var(--ease) .12s both}
-.stat-card{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:16px;box-shadow:var(--shadow-card);transition:transform .18s var(--spring),border-color .18s;cursor:pointer;position:relative;overflow:hidden;min-height:104px;display:flex;flex-direction:column}
+.stat-card{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:16px;box-shadow:var(--shadow-card);transition:transform .2s var(--spring),box-shadow .22s var(--ease),border-color .2s;cursor:pointer;position:relative;overflow:hidden;min-height:104px;display:flex;flex-direction:column}
+.stat-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px -14px rgba(0,0,0,.6);border-color:rgba(255,255,255,0.10)}
 .stat-card:active{transform:scale(.96)}
 .stat-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .stat-icon{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -391,11 +395,15 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 .home-sec-hdr{display:flex;align-items:center;justify-content:space-between;margin:6px 16px 10px;padding:0 2px}
 .home-sec-hdr .sec-title{margin:0;padding:0}
 .home-sec-hdr .sec-link{font-size:13px;font-weight:700;color:var(--blue-light);cursor:pointer}
-#home-recent .h-item{background:var(--card);border-radius:18px;border:1px solid rgba(255,255,255,0.06);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
-#home-recent .h-item:active{transform:scale(.97);background:var(--surface-elevated)}
+#home-recent .h-item{background:var(--card);border-radius:18px;border:1px solid rgba(255,255,255,0.06);box-shadow:var(--shadow-sm);position:relative;overflow:hidden;transition:transform .22s var(--spring),box-shadow .22s var(--ease),border-color .22s,background .18s}
+#home-recent .h-item::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--rx,50%) var(--ry,50%),rgba(255,255,255,0.10),transparent 60%);opacity:0;transition:opacity .35s;pointer-events:none}
+#home-recent .h-item:hover{transform:translateY(-2px);box-shadow:0 10px 26px -12px rgba(0,0,0,.55);border-color:rgba(255,255,255,0.10)}
+#home-recent .h-item:hover::after{opacity:1}
+#home-recent .h-item:active{transform:scale(.97) translateY(0);background:var(--surface-elevated)}
 #home-recent .h-icon{width:46px;height:46px;font-size:19px;background:linear-gradient(150deg,var(--blue-dim),rgba(99,102,241,0.10))}
 #home-recent .h-name{font-size:15px}
-#home-recent .row-right{font-size:18px;opacity:.5}
+#home-recent .row-right{font-size:18px;opacity:.5;transition:transform .22s var(--spring)}
+#home-recent .h-item:hover .row-right{transform:translateX(3px);opacity:.85}
 #home-recent .empty{padding:40px 28px}
 #home-recent .empty-icon{font-size:38px;opacity:.7;width:64px;height:64px;border-radius:18px;background:var(--glass-bg);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;margin:0 auto}
 
@@ -1047,6 +1055,7 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
+  <div class="nav-indicator" id="nav-indicator"></div>
   <div class="nav-item active" id="nav-home" onclick="navTo('home')">
     <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
     <div class="nav-label">Home</div>
@@ -1269,6 +1278,29 @@ const NAV_SCREENS=['home','plan','progress','profile'];
 const NO_NAV=['workout','complete'];
 let screenStack=[];
 
+function positionNavIndicator(){
+  const ind=document.getElementById('nav-indicator');
+  const active=document.querySelector('.nav-item.active');
+  const nav=document.querySelector('.bottom-nav');
+  if(!ind||!active||!nav){ return; }
+  const navRect=nav.getBoundingClientRect();
+  const itemRect=active.getBoundingClientRect();
+  if(itemRect.width===0){ ind.style.opacity='0'; return; }
+  const left=itemRect.left-navRect.left;
+  ind.style.width=itemRect.width+'px';
+  ind.style.transform=`translateX(${left}px)`;
+  ind.style.opacity='1';
+}
+window.addEventListener('resize', positionNavIndicator);
+document.addEventListener('DOMContentLoaded', ()=>setTimeout(positionNavIndicator,60));
+document.addEventListener('pointermove', e=>{
+  const item=e.target.closest('#home-recent .h-item');
+  if(!item) return;
+  const r=item.getBoundingClientRect();
+  item.style.setProperty('--rx', ((e.clientX-r.left)/r.width*100)+'%');
+  item.style.setProperty('--ry', ((e.clientY-r.top)/r.height*100)+'%');
+});
+
 function navTo(s, isBack=false){
   ALL_SCREENS.forEach(x=>{ const el=document.getElementById(x+'-screen'); if(el){ el.style.display='none'; el.classList.remove('entering','entering-back'); } });
   const el=document.getElementById(s+'-screen');
@@ -1283,6 +1315,7 @@ function navTo(s, isBack=false){
   document.querySelector('.bottom-nav').style.display=showNav?'flex':'none';
   NAV_SCREENS.forEach(n=>document.getElementById('nav-'+n)?.classList.remove('active'));
   if(NAV_SCREENS.includes(s)) document.getElementById('nav-'+s)?.classList.add('active');
+  positionNavIndicator();
   if(s==='home') refreshHome();
   if(s==='plan') renderPlan();
   if(s==='progress') refreshProgress();
