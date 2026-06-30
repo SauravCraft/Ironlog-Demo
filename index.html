@@ -84,7 +84,8 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 /* HEADERS */
 .screen-header{padding:22px 18px 14px;display:flex;justify-content:space-between;align-items:center}
 .screen-title{font-size:30px;font-weight:800;letter-spacing:-.8px}
-.back-link{color:var(--blue);font-size:17px;cursor:pointer;padding:6px 0;display:flex;align-items:center;gap:2px}
+.back-link{color:var(--blue);font-size:17px;cursor:pointer;padding:6px 4px 6px 0;display:flex;align-items:center;gap:4px}
+.back-link svg{flex-shrink:0}
 
 /* CHIP ROW */
 .chip-row{display:flex;gap:8px;overflow-x:auto;padding:0 16px 14px;scrollbar-width:none}
@@ -194,7 +195,6 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 .ring-center-sub{font-size:9px;color:var(--muted);text-align:center;line-height:1.1}
 
 /* ======== WORKOUT ======== */
-#rest-screen{display:none}
 #workout-screen{display:none}
 .wo-header{padding:22px 18px 12px;display:flex;align-items:center;justify-content:space-between}
 .wo-center{text-align:center}
@@ -252,26 +252,6 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 .ex-item-name{font-size:16px;font-weight:700}
 .ex-item-sub{font-size:13px;color:var(--muted);margin-top:2px}
 .ex-add-btn{font-size:24px;color:var(--blue);font-weight:700;width:32px;text-align:center}
-
-/* ======== REST ======== */
-#rest-screen{display:none}
-.rest-body{display:flex;flex-direction:column;align-items:center;padding:10px 16px 80px}
-.ring-wrap{position:relative;margin:8px 0 16px}
-.ring-wrap svg{transform:rotate(-90deg)}
-.ring-bg{fill:none;stroke:#1E1E1E;stroke-width:12}
-.ring-fg{fill:none;stroke:var(--blue);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset .9s linear}
-.ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
-.ring-time{font-size:54px;font-weight:800;letter-spacing:-2px;font-variant-numeric:tabular-nums}
-.ring-label{font-size:13px;color:var(--muted);margin-top:2px}
-.rec-pill{background:var(--blue-dim);border:1px solid rgba(59,130,246,.2);border-radius:20px;padding:6px 16px;font-size:13px;color:var(--blue);margin-bottom:24px}
-.t-ctrl{display:flex;gap:16px;align-items:center;margin-bottom:20px}
-.t-btn{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer}
-.t-circle{width:62px;height:62px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;transition:transform .15s}
-.t-circle:active{transform:scale(.9)}
-.t-circle.primary{background:var(--blue);border-color:var(--blue);width:72px;height:72px;font-size:26px;box-shadow:0 4px 20px var(--blue-glow)}
-.t-label{font-size:11px;color:var(--muted)}
-.rest-info-row{display:flex;gap:8px;width:100%}
-.rest-info-card{flex:1;padding:13px}
 
 /* ======== PROGRESS ======== */
 #progress-screen{display:none}
@@ -344,40 +324,6 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 .setting-val{font-size:13px;color:var(--muted)}
 .setting-chev{color:var(--dim);font-size:14px;margin-left:4px}
 
-/* ======== PLATE CALC ======== */
-#platecalc-screen{display:none}
-.plate-display{margin:16px;background:var(--surface);border-radius:var(--r);padding:20px;text-align:center}
-.plate-weight{font-size:52px;font-weight:900;letter-spacing:-2px;color:var(--blue)}
-.plate-unit{font-size:16px;color:var(--muted);margin-top:4px}
-.plate-visual{display:flex;align-items:center;justify-content:center;gap:4px;margin:20px 0;flex-wrap:wrap}
-.plate-bar-center{width:16px;height:70px;background:var(--muted);border-radius:4px}
-.plate-el{height:var(--ph);width:var(--pw);border-radius:6px;background:var(--pc);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;letter-spacing:-.2px}
-.plate-btns{margin:0 16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.pbt{padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .15s;border-radius:14px;border:1.5px solid var(--border)}
-.pbt:active{transform:scale(.94)}
-.pbt.selected{border-color:var(--blue);background:var(--blue-dim)}
-.pbt-lbl{font-size:14px;font-weight:800}
-.pbt-sub{font-size:10px;color:var(--muted)}
-
-/* ======== AI COACH ======== */
-#aicoach-screen{display:none}
-.chat-area{padding:16px;display:flex;flex-direction:column;gap:12px;padding-bottom:140px}
-.chat-msg{max-width:85%;padding:12px 15px;border-radius:18px;font-size:14px;line-height:1.55;animation:fadeUp .25s ease both}
-.chat-ai{background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:18px 18px 18px 4px;align-self:flex-start;color:var(--text)}
-.chat-user{background:var(--blue);color:#fff;border-radius:18px 18px 4px 18px;align-self:flex-end}
-.chat-input-wrap{position:fixed;bottom:0;left:0;right:0;background:rgba(13,13,13,.97);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,0.08);padding:8px 16px 28px}
-.chat-quick-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px;padding-bottom:2px}
-.chat-quick-row::-webkit-scrollbar{display:none}
-.chat-quick{background:var(--card);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
-.chat-quick:active{background:var(--blue-dim);border-color:var(--blue);color:var(--blue)}
-.chat-input-row{display:flex;gap:8px;align-items:center}
-.chat-send{width:44px;height:44px;background:var(--blue);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;transition:transform .15s var(--spring)}
-.chat-send:active{transform:scale(.88)}
-.chat-typing{display:flex;gap:5px;align-items:center;padding:12px 14px}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:blink 1.4s infinite}
-.dot:nth-child(2){animation-delay:.2s}
-.dot:nth-child(3){animation-delay:.4s}
-@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
 
 /* ======== BODY STATS ======== */
 #bodystats-screen{display:none}
@@ -507,7 +453,7 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
         </div>
         <div>
           <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Bodyweight <span style="opacity:.5;text-transform:none;letter-spacing:0;font-size:11px" id="ob-bw-unit-lbl">(optional, kg)</span></div>
-          <input class="ob-input" type="number" inputmode="decimal" id="ob-bw" placeholder="75">
+          <input class="ob-input" type="number" inputmode="decimal" id="ob-bw" placeholder="75" min="1" max="500">
         </div>
       </div>
     </div>
@@ -555,7 +501,6 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
   <!-- QUICK ACTIONS -->
   <div class="quick-actions">
     <div class="qa-btn card" onclick="navTo('progress')"><div class="qa-icon">📊</div><div class="qa-label">Progress</div></div>
-    <div class="qa-btn card" onclick="navTo('aicoach')"><div class="qa-icon">🤖</div><div class="qa-label">AI Coach</div></div>
     <div class="qa-btn card" onclick="navTo('bodystats')"><div class="qa-icon">📏</div><div class="qa-label">Body Stats</div></div>
   </div>
 
@@ -566,7 +511,7 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 <!-- WORKOUT -->
 <div id="workout-screen" class="screen">
   <div class="wo-header">
-    <div class="back-link" onclick="askEndWorkout()">‹ End</div>
+    <div class="back-link" onclick="askEndWorkout()"><svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 2 2 8 8 14"/></svg>End</div>
     <div class="wo-center"><div class="wo-name" id="wo-name">Push Day</div><div class="wo-timer" id="wo-timer">00:00</div></div>
     <div style="color:var(--muted);font-size:20px;cursor:pointer" onclick="openWoMenu()">•••</div>
   </div>
@@ -574,7 +519,7 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
   <div style="padding:0 16px;margin-bottom:8px">
     <button class="btn btn-secondary" style="font-size:13px;padding:11px" onclick="navTo('addex')">+ Add Exercise</button>
   </div>
-  <div style="height:100px"></div>
+  <div style="height:120px"></div>
   <div class="finish-float" id="finish-float">
     <div class="autosave-indicator" id="autosave-indicator"><div id="autosave-dot"></div>Saved</div>
     <button class="btn btn-secondary" style="width:auto;padding:17px 16px;font-size:15px;flex-shrink:0" onclick="askEndWorkout()">End</button>
@@ -589,53 +534,6 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
   <div class="kb-btn" onclick="kbAdjust(2.5)">+2.5</div>
   <div class="kb-btn" onclick="kbAdjust(5)">+5</div>
   <div class="kb-btn kb-done" onclick="kbDone()">Done ✓</div>
-</div>
-
-<!-- REST TIMER -->
-<div id="rest-screen" class="screen">
-  <div class="screen-header">
-    <div class="back-link" onclick="skipRest()">‹ Back</div>
-    <div class="screen-title" style="font-size:20px">Rest</div>
-    <div style="width:50px"></div>
-  </div>
-  <div style="display:flex;flex-direction:column;align-items:center;padding:10px 16px 80px">
-    <div class="rec-pill" id="rec-pill">Recommended: 90s</div>
-    <div style="position:relative;margin:8px 0 16px">
-      <svg width="220" height="220" viewBox="0 0 220 220" style="transform:rotate(-90deg)">
-        <circle cx="110" cy="110" r="96" fill="none" stroke="#1E1E1E" stroke-width="12"/>
-        <circle class="ring-fg" id="ring-fg" cx="110" cy="110" r="96" stroke-dasharray="603" stroke-dashoffset="0"/>
-      </svg>
-      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
-        <div class="ring-time" id="ring-time" role="timer" aria-live="polite">1:30</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:2px">remaining</div>
-      </div>
-    </div>
-    <div style="display:flex;gap:16px;align-items:center;margin-bottom:20px">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer" onclick="adjustRest(-15)">
-        <div style="width:62px;height:62px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700">−15s</div>
-        <div style="font-size:11px;color:var(--muted)">Less</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer" onclick="toggleRestPause()">
-        <div id="rest-pause-btn" style="width:72px;height:72px;border-radius:50%;background:var(--blue);border:1px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 20px var(--blue-glow)">⏸</div>
-        <div id="rest-pause-lbl" style="font-size:11px;color:var(--muted)">Pause</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer" onclick="adjustRest(15)">
-        <div style="width:62px;height:62px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700">+15s</div>
-        <div style="font-size:11px;color:var(--muted)">More</div>
-      </div>
-    </div>
-    <button class="btn btn-secondary" style="margin-bottom:16px" onclick="skipRest()">Skip Rest →</button>
-    <div style="display:flex;gap:8px;width:100%">
-      <div class="card" style="flex:1;padding:13px">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">Next Set</div>
-        <div id="rest-next-set" style="font-size:15px;font-weight:700">—</div>
-      </div>
-      <div class="card" style="flex:1;padding:13px">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:700;text-transform:uppercase;letter-spacing:.04em">Last Vol</div>
-        <div id="rest-last-vol" style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">—</div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- ADD EXERCISE -->
@@ -773,76 +671,22 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
   <div class="sec-title">Settings</div>
   <div class="card" style="margin:0 16px 80px">
     <div class="setting-row" onclick="toggleUnits()"><div class="setting-icon">⚖️</div><div class="setting-lbl">Units</div><div class="setting-val" id="units-lbl">KG</div><div class="setting-chev">›</div></div>
-    <div class="setting-row" onclick="navTo('platecalc')"><div class="setting-icon">⚖️</div><div class="setting-lbl">Plate Calculator</div><div class="setting-val">Barbell</div><div class="setting-chev">›</div></div>
-    <div class="setting-row" onclick="navTo('aicoach')"><div class="setting-icon">🤖</div><div class="setting-lbl">AI Coach</div><div class="setting-val">Active</div><div class="setting-chev">›</div></div>
     <div class="setting-row" onclick="navTo('bodystats')"><div class="setting-icon">📏</div><div class="setting-lbl">Body Measurements</div><div class="setting-val">Track</div><div class="setting-chev">›</div></div>
-  </div>
-</div>
-
-<!-- PLATE CALCULATOR -->
-<div id="platecalc-screen" class="screen">
-  <div class="screen-header">
-    <div class="back-link" onclick="goBack()">‹ Back</div>
-    <div class="screen-title">Plate Calc</div>
-    <div style="font-size:15px;color:var(--blue);cursor:pointer;font-weight:700" onclick="resetPlate()">Reset</div>
-  </div>
-  <div class="plate-display">
-    <div class="plate-weight" id="plate-total">20</div>
-    <div class="plate-unit">kg total</div>
-    <div style="font-size:13px;color:var(--muted);margin-top:4px" id="plate-perside">0 kg per side</div>
-    <div class="plate-visual" id="plate-visual"></div>
-  </div>
-  <div class="sec-title">Add Plates (per side)</div>
-  <div class="plate-btns" id="plate-btns"></div>
-  <div style="margin:16px 16px 0;padding:14px" class="card">
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600">BAR WEIGHT</div>
-    <div style="display:flex;gap:8px">
-      <div class="chip" onclick="setBarWeight(15,this)" style="flex:1;text-align:center">15 kg<br><span style="font-size:10px;color:var(--dim)">Women's</span></div>
-      <div class="chip active" onclick="setBarWeight(20,this)" style="flex:1;text-align:center">20 kg<br><span style="font-size:10px;color:var(--dim)">Men's</span></div>
-      <div class="chip" onclick="setBarWeight(25,this)" style="flex:1;text-align:center">25 kg<br><span style="font-size:10px;color:var(--dim)">Heavy</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- AI COACH -->
-<div id="aicoach-screen" class="screen">
-  <div class="screen-header">
-    <div class="back-link" onclick="goBack()">‹ Back</div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-      <div class="screen-title" style="font-size:18px">AI Coach</div>
-      <div id="coach-ctx-pill" style="display:none;font-size:10px;font-weight:700;color:var(--green);background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:20px;padding:2px 9px;align-items:center;gap:4px">● Knows your sessions</div>
-    </div>
-    <div style="font-size:22px">🤖</div>
-  </div>
-  <div class="chat-area" id="chat-area"></div>
-  <div style="height:140px"></div>
-  <div class="chat-input-wrap">
-    <div class="chat-quick-row" id="chat-quick-row">
-      <div class="chat-quick" onclick="sendQuickChat('How am I progressing?')">How am I progressing? 📈</div>
-      <div class="chat-quick" onclick="sendQuickChat('What should I do today?')">Today\'s focus 🎯</div>
-      <div class="chat-quick" onclick="sendQuickChat('How can I improve my bench press?')">Bench tips 🏋️</div>
-      <div class="chat-quick" onclick="sendQuickChat('What\'s my recovery like?')">Recovery advice 💤</div>
-      <div class="chat-quick" onclick="sendQuickChat('How much protein should I eat?')">Nutrition tips 🥩</div>
-    </div>
-    <div class="chat-input-row">
-      <input class="input" id="chat-input" placeholder="Ask your coach…" style="flex:1" onkeydown="if(event.key==='Enter')sendChat()">
-      <div class="chat-send" onclick="sendChat()">↑</div>
-    </div>
   </div>
 </div>
 
 <!-- BODY STATS -->
 <div id="bodystats-screen" class="screen">
   <div class="screen-header">
-    <div class="back-link" onclick="goBack()">‹ Back</div>
+    <div class="back-link" onclick="goBack()"><svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 2 2 8 8 14"/></svg>Back</div>
     <div class="screen-title">Body Stats</div>
     <div style="font-size:15px;color:var(--blue);cursor:pointer;font-weight:700" onclick="saveBodyStats()">Save</div>
   </div>
   <div class="body-stat-grid">
-    <div class="bsg card"><div class="bsg-lbl">Weight</div><div class="bsg-input"><input class="bsg-in" type="number" id="bs-weight" placeholder="75" inputmode="decimal"></div><div class="bsg-unit">kg</div></div>
-    <div class="bsg card"><div class="bsg-lbl">Height</div><div class="bsg-input"><input class="bsg-in" type="number" id="bs-height" placeholder="178" inputmode="decimal"></div><div class="bsg-unit">cm</div></div>
-    <div class="bsg card"><div class="bsg-lbl">Body Fat</div><div class="bsg-input"><input class="bsg-in" type="number" id="bs-bf" placeholder="15" inputmode="decimal"></div><div class="bsg-unit">%</div></div>
-    <div class="bsg card"><div class="bsg-lbl">Age</div><div class="bsg-input"><input class="bsg-in" type="number" id="bs-age" placeholder="25" inputmode="numeric"></div><div class="bsg-unit">yrs</div></div>
+    <div class="bsg card"><div class="bsg-lbl">Weight</div><div class="bsg-input"><input class="bsg-in" type="number" id="bs-weight" placeholder="75" inputmode="decimal" min="1" max="500"></div><div class="bsg-unit">kg</div></div>
+    <div class="bsg card"><div class="bsg-lbl">Height</div><div class="bsg-input"><input class="bsg-in" type="number" id="bs-height" placeholder="178" inputmode="decimal" min="50" max="250"></div><div class="bsg-unit">cm</div></div>
+    <div class="bsg card"><div class="bsg-lbl">Body Fat</div><div class="bsg-input"><input class="bsg-in" type="number" id="bs-bf" placeholder="15" inputmode="decimal" min="1" max="70"></div><div class="bsg-unit">%</div></div>
+    <div class="bsg card"><div class="bsg-lbl">Age</div><div class="bsg-input"><input class="bsg-in" type="number" id="bs-age" placeholder="25" inputmode="numeric" min="10" max="100"></div><div class="bsg-unit">yrs</div></div>
   </div>
   <div class="sec-title">Calculated</div>
   <div style="margin:0 16px 10px;display:grid;grid-template-columns:1fr 1fr;gap:8px" id="bs-calcs"></div>
@@ -931,12 +775,8 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 let DB = { workouts:[], prs:{}, body:{bodyHistory:[]}, settings:{units:'KG', nextDayIdx:0, name:'', goal:'Build Muscle', exp:'Intermediate'} };
 let AW = null; // active workout
 let woTimer = null, woSec = 0;
-let restTotal=90, restRemain=90, restPaused=false, restInterval=null;
 let calDate = new Date();
 let exCat = 'All';
-let plateWeights = [];
-let barWeight = 20;
-let chatHistory = [];
 
 const EX_DB = [
   {n:'Bench Press',c:'Chest',i:'🏋️',m:'Pectorals'},
@@ -1051,12 +891,6 @@ const TEMPLATES = [
   {n:'Custom',i:'✏️',focus:'',est:'—',ex:[]},
 ];
 
-const PLATE_DATA = [
-  {w:25,c:'#EF4444',h:80,pw:20},{w:20,c:'#3B82F6',h:72,pw:18},{w:15,c:'#F59E0B',h:64,pw:16},
-  {w:10,c:'#22C55E',h:56,pw:14},{w:5,c:'#8B5CF6',h:46,pw:12},{w:2.5,c:'#EC4899',h:38,pw:10},
-  {w:1.25,c:'#A1A1AA',h:30,pw:8}
-];
-
 // ===== STORAGE (IndexedDB primary, localStorage fallback) =====
 const IDB_NAME = 'IronLogDB', IDB_STORE = 'data', IDB_KEY = 'db_v1';
 let _idb = null;
@@ -1131,9 +965,9 @@ async function load(){
 }
 
 // ===== NAV =====
-const ALL_SCREENS=['home','workout','addex','plan','progress','history','profile','platecalc','aicoach','bodystats','complete','rest'];
+const ALL_SCREENS=['home','workout','addex','plan','progress','history','profile','bodystats','complete'];
 const NAV_SCREENS=['home','plan','history','profile'];
-const NO_NAV=['workout','complete','rest'];
+const NO_NAV=['workout','complete'];
 let screenStack=[];
 
 function navTo(s, isBack=false){
@@ -1156,8 +990,6 @@ function navTo(s, isBack=false){
   if(s==='history'){ renderCal(); renderHist(); }
   if(s==='profile') refreshProfile();
   if(s==='addex'){ renderExList(); renderRecentEx(); }
-  if(s==='platecalc') renderPlate();
-  if(s==='aicoach') initChat();
   if(s==='bodystats') initBodyStats();
   screenStack.push(s);
 }
@@ -1209,8 +1041,13 @@ function finishOB(){
   DB.settings.units=obUnit;
   const nameVal=document.getElementById('ob-name')?.value?.trim();
   if(nameVal)DB.settings.name=nameVal;
-  const bwVal=parseFloat(document.getElementById('ob-bw')?.value);
-  if(bwVal&&!isNaN(bwVal)){
+  const bwRaw=parseFloat(document.getElementById('ob-bw')?.value);
+  // Sane bounds: ~20–500kg covers kg and lbs entries without garbage values slipping through
+  const bwVal = (!isNaN(bwRaw) && bwRaw>0 && bwRaw<=500) ? bwRaw : null;
+  if(document.getElementById('ob-bw')?.value && bwVal===null){
+    showToast('⚠️ Bodyweight looks off — skipped saving it');
+  }
+  if(bwVal){
     if(!DB.body)DB.body={};
     if(!DB.body.bodyHistory)DB.body.bodyHistory=[];
     DB.body.weight=bwVal;
@@ -1641,8 +1478,8 @@ function toggleSet(ei,si){
         }, 1200);
       }, 400);
     } else {
-      // Auto-start rest timer
-      startRestAuto();
+      // Set logged instantly — no forced rest screen
+      haptic([20]);
     }
   } else {
     haptic([15]);
@@ -1725,83 +1562,6 @@ function deleteSetRow(ei, si){
   rerenderExercise(ei);
 }
 
-function startRestAuto(){
-  haptic([20,10,40]);
-  // Determine recommended rest based on exercise type (compound vs isolation)
-  let exName = '';
-  if(AW && _kbEi>=0) exName = AW.exercises[_kbEi]?.name || '';
-  const isCompound = ['Squat','Deadlift','Bench Press','Barbell Row','Overhead Press','Pull-Up','Romanian Deadlift'].some(c=>exName.includes(c));
-  restTotal = isCompound ? 180 : 90;
-  restRemain = restTotal;
-  restPaused = false;
-  navToRest();
-  startRestInterval();
-}
-
-function navToRest(){ navTo('rest'); }
-
-function startRestInterval(){
-  clearInterval(restInterval);
-  updateRestUI();
-  restInterval = setInterval(()=>{
-    if(restPaused) return;
-    restRemain--;
-    updateRestUI();
-    if(restRemain<=0){
-      clearInterval(restInterval);
-      haptic([60,30,60,30,100]);
-      try{
-        const ctx = new (window.AudioContext||window.webkitAudioContext)();
-        const osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.value=880;
-        const g = ctx.createGain(); g.gain.setValueAtTime(0.5,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
-        osc.connect(g); g.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime+0.4);
-      }catch(e){}
-      showToast('⏱ Rest done — get that set!');
-      setTimeout(()=>{ if(document.getElementById('rest-screen')?.style.display==='block') skipRest(); }, 1800);
-    }
-  }, 1000);
-}
-
-function updateRestUI(){
-  const timeEl = document.getElementById('ring-time');
-  if(timeEl) timeEl.textContent = fmtDur(Math.max(0,restRemain));
-  const ring = document.getElementById('ring-fg');
-  if(ring){
-    const circ = 603;
-    const offset = Math.round(circ * (1 - Math.max(0,restRemain)/Math.max(restTotal,1)));
-    ring.style.strokeDashoffset = offset;
-  }
-  const pill = document.getElementById('rec-pill');
-  if(pill) pill.textContent = `Recommended: ${fmtDur(restTotal)}${restTotal===180?' (compound)':' (isolation)'}`;
-  const nextInfo = document.getElementById('rest-next-set');
-  if(nextInfo && AW && _kbEi>=0){
-    const ex = AW.exercises[_kbEi];
-    const nextIdx = ex?.sets?.findIndex(s=>!s.done);
-    nextInfo.textContent = (nextIdx>=0) ? `Set ${nextIdx+1} of ${ex.sets.length}` : 'Last set done';
-  }
-  const volInfo = document.getElementById('rest-last-vol');
-  if(volInfo && AW && _kbEi>=0 && _kbSi>=0){
-    const s = AW.exercises[_kbEi]?.sets[_kbSi];
-    volInfo.textContent = (s && s.w && s.r) ? fmtN((parseFloat(s.w)||0)*(parseInt(s.r)||0))+' '+DB.settings.units : '—';
-  }
-  const pauseBtn = document.getElementById('rest-pause-btn');
-  const pauseLbl = document.getElementById('rest-pause-lbl');
-  if(pauseBtn) pauseBtn.textContent = restPaused ? '▶' : '⏸';
-  if(pauseLbl) pauseLbl.textContent = restPaused ? 'Resume' : 'Pause';
-}
-
-function toggleRestPause(){ restPaused = !restPaused; haptic([10]); updateRestUI(); }
-function adjustRest(delta){
-  restTotal = Math.max(15, restTotal+delta);
-  restRemain = Math.max(0, restRemain+delta);
-  haptic([10]);
-  updateRestUI();
-}
-function skipRest(){
-  clearInterval(restInterval);
-  navTo('workout');
-}
-
 function showFinishSheet(){
   const sh=mkSheet('Finish Workout?',`
     <div style="font-size:14px;color:var(--muted);margin-bottom:16px">All sets are done! Ready to save your session?</div>
@@ -1832,7 +1592,7 @@ function openWoMenu(){
 function askEndWorkout(){
   const sh=mkSheet('End Workout?',`
     <div style="font-size:14px;color:var(--muted);margin-bottom:16px">Your progress will not be saved if you discard this session.</div>
-    <button class="btn btn-primary" style="background:var(--red);box-shadow:none;margin-bottom:8px" onclick="document.querySelectorAll('.overlay').forEach(e=>e.remove());clearInterval(woTimer);clearInterval(restInterval);AW=null;navTo('home')">Discard Session</button>
+    <button class="btn btn-primary" style="background:var(--red);box-shadow:none;margin-bottom:8px" onclick="document.querySelectorAll('.overlay').forEach(e=>e.remove());clearInterval(woTimer);AW=null;navTo('home')">Discard Session</button>
     <button class="btn btn-secondary" onclick="document.querySelectorAll('.overlay').forEach(e=>e.remove())">Keep Going</button>`);
   document.body.appendChild(sh);
   requestAnimationFrame(()=>sh.classList.add('open'));
@@ -1882,7 +1642,6 @@ function launchConfetti(){
 function finishWorkout(){
   if(!AW)return;
   clearInterval(woTimer);
-  clearInterval(restInterval);
   AW.duration=woSec;
   const doneSets=AW.exercises.flatMap(e=>e.sets.filter(s=>s.done));
   const vol=doneSets.reduce((sum,s)=>sum+(parseFloat(s.w)||0)*(parseInt(s.r)||0),0);
@@ -2454,163 +2213,6 @@ async function clearData(){
   showToast('Data cleared');
 }
 
-// ===== PLATE CALC =====
-function resetPlate(){ plateWeights=[]; renderPlate(); }
-function setBarWeight(w,el){
-  barWeight=w;
-  document.querySelectorAll('.plate-btns .chip').forEach(c=>c.classList.remove('active'));
-  document.querySelectorAll('#platecalc-screen .plate-btns').forEach(()=>{});
-  el.classList.add('active');
-  renderPlate();
-}
-
-function addPlate(w){
-  plateWeights.push(w);
-  renderPlate();
-}
-function removePlate(w){
-  const idx=plateWeights.lastIndexOf(w);
-  if(idx>=0)plateWeights.splice(idx,1);
-  renderPlate();
-}
-
-function renderPlate(){
-  const perSide=plateWeights.reduce((s,p)=>s+p,0);
-  const total=barWeight+perSide*2;
-  document.getElementById('plate-total').textContent=total;
-  document.getElementById('plate-perside').textContent=perSide+' kg per side';
-  
-  // Plate visual
-  const sorted=[...plateWeights].sort((a,b)=>b-a);
-  const pd_map={25:{c:'#EF4444',h:80,pw:20},20:{c:'#3B82F6',h:72,pw:18},15:{c:'#F59E0B',h:64,pw:16},10:{c:'#22C55E',h:56,pw:14},5:{c:'#8B5CF6',h:46,pw:12},2.5:{c:'#EC4899',h:38,pw:10},1.25:{c:'#A1A1AA',h:30,pw:8}};
-  const plateHTML=sorted.map(w=>{
-    const p=pd_map[w]||{c:'#555',h:40,pw:12};
-    return `<div style="--ph:${p.h}px;--pw:${p.pw}px;--pc:${p.c}" class="plate-el">${w}</div>`;
-  }).join('');
-  document.getElementById('plate-visual').innerHTML=`${plateHTML}<div class="plate-bar-center"></div>${[...sorted].reverse().map(w=>{const p=pd_map[w]||{c:'#555',h:40,pw:12};return`<div style="--ph:${p.h}px;--pw:${p.pw}px;--pc:${p.c}" class="plate-el">${w}</div>`}).join('')}`;
-
-  // Buttons
-  document.getElementById('plate-btns').innerHTML=PLATE_DATA.map(p=>{
-    const cnt=plateWeights.filter(w=>w===p.w).length;
-    return `<div class="pbt${cnt>0?' selected':''}" onclick="addPlate(${p.w})">
-      <div style="width:28px;height:28px;background:${p.c};border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff">${p.w}</div>
-      <div class="pbt-lbl" style="color:${p.c}">${p.w}kg</div>
-      <div class="pbt-sub">${cnt?cnt+'× added':'tap to add'}</div>
-    </div>`;
-  }).join('')+`<div class="pbt" onclick="if(plateWeights.length){plateWeights.pop();renderPlate();}" style="border-color:var(--red-dim)">
-    <div style="font-size:24px">↩️</div><div class="pbt-lbl" style="color:var(--red)">Undo</div><div class="pbt-sub">last plate</div>
-  </div>`;
-}
-
-// ===== AI COACH =====
-// Build a context string from real user data — this is what makes the coach
-// actually "know" the user's training history rather than giving generic advice.
-function buildCoachContext(){
-  const ws = DB.workouts.length;
-  const recentWos = [...DB.workouts].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,3);
-  const streak = calcStreak();
-  const prEntries = Object.entries(DB.prs).slice(0,6).map(([n,p])=>`${n}: ${p.w}${DB.settings.units}×${p.r}`).join(', ');
-  const monthVol = fmtN(calcMonthVol());
-  const recentSummary = recentWos.map(w=>`${w.name} (${fmtDate(w.date)}, vol ${fmtN(calcVol(w))}${DB.settings.units}, ${(w.exercises||[]).flatMap(e=>e.sets||[]).filter(s=>s.done).length} sets)`).join('; ');
-  const bodyCtx = DB.body?.weight ? `Bodyweight: ${DB.body.weight}${DB.settings.units}. ` : '';
-  const goal = DB.settings.goal || 'Build Muscle';
-  const exp = DB.settings.exp || 'Intermediate';
-  return `You are the IronLog AI Coach — a knowledgeable, direct strength and hypertrophy coach speaking to the app's user in a workout-tracker chat.
-User profile: goal = ${goal}, experience level = ${exp}. ${bodyCtx}
-Training data: ${ws} total workouts logged, current streak ${streak} days, ${monthVol}${DB.settings.units} volume this month.
-Personal records: ${prEntries || 'none logged yet'}.
-Recent sessions: ${recentSummary || 'none yet'}.
-Give specific, actionable, concise advice using these real numbers whenever relevant — never invent data that isn't given. Keep responses under ~120 words unless the user asks for depth. Use **bold** sparingly for key numbers or terms.`;
-}
-
-// Fallback responses used only if the API call fails (offline, rate limit, etc.)
-const AI_FALLBACK_RESPONSES=[
-  s=>s.includes('bench')?`Based on your logs, your Bench Press 1RM is around ${(DB.prs['Bench Press']?.w||0)*1.2|0}${DB.settings.units}. Try adding 2.5${DB.settings.units} next session with the same reps to apply progressive overload.`
-    :s.includes('squat')?`Squats are your compound king. Focus on depth and controlled eccentric. Your estimated 1RM is ${(DB.prs['Squat']?.w||0)*1.2|0}${DB.settings.units}.`
-    :s.includes('volume')?`This month's volume is ${fmtN(calcMonthVol())}${DB.settings.units}. Aim for 10–15% increase per month for optimal hypertrophy.`
-    :s.includes('rest')?'For hypertrophy: 60–90s rest. For strength: 3–5 minutes. Your current timer auto-adjusts based on exercise type.'
-    :s.includes('protein')?'Aim for 1.6–2.2g of protein per kg of bodyweight. With your training volume, closer to 2g is optimal.'
-    :s.includes('program')?'Based on your history, a structured split suits your schedule — and you\'re already on it!'
-    :`Based on your ${DB.workouts.length} logged workouts and ${Object.keys(DB.prs).length} PRs, you're progressing well. Stay consistent and sleep 7–9 hours for optimal recovery.\n\n(Note: I couldn't reach the AI service just now, so this is a general tip rather than a fully personalized answer — try again in a moment.)`
-];
-
-function initChat(){
-  const ws=DB.workouts.length;
-  const ctxPill = document.getElementById('coach-ctx-pill');
-  if(ctxPill) ctxPill.style.display = ws>0 ? 'inline-flex' : 'none';
-  if(chatHistory.length>0)return;
-  const userName = DB.settings.name || 'there';
-  const dayIdx=(DB.settings.nextDayIdx||0)%6;
-  const tmpl=TEMPLATES[dayIdx];
-  const dailyInsight = ws > 0 
-    ? `📊 **Today's insight:** Your next session is ${tmpl.n}. ${getTopEx() ? `Your strongest lift is ${getTopEx()} at ${DB.prs[getTopEx()]?.w}${DB.settings.units}.` : 'Keep logging to unlock personalized insights.'} ${calcStreak()>0?`You're on a ${calcStreak()}-day streak — keep it going! 🔥`:''}`
-    : '💡 **Getting started:** Log your first workout to unlock personalized AI coaching and strength insights.';
-  chatHistory=[
-    {role:'ai',text:`Hey${userName !== 'there' ? ' '+userName : ''}! 👋 I'm your IronLog AI Coach. I can see you've logged **${ws} workout${ws===1?'':'s'}**${ws>0?' with '+Object.keys(DB.prs).length+' personal records':' so far'}.`},
-    {role:'ai',text:dailyInsight}
-  ];
-  renderChat();
-}
-
-function sendQuickChat(text){
-  document.getElementById('chat-input').value = text;
-  sendChat();
-}
-
-function mdToHtml(text){
-  return text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-}
-
-function renderChat(){
-  document.getElementById('chat-area').innerHTML=chatHistory.map(m=>{
-    if(m.typing) return `<div class="chat-msg chat-ai"><div class="chat-typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
-    return `<div class="chat-msg chat-${m.role}">${mdToHtml(m.text)}</div>`;
-  }).join('');
-  const a=document.getElementById('chat-area');
-  a.scrollTop=a.scrollHeight;
-}
-
-async function sendChat(){
-  const inp=document.getElementById('chat-input');
-  const q=inp.value.trim(); if(!q)return;
-  chatHistory.push({role:'user',text:q});
-  inp.value='';
-  chatHistory.push({role:'ai',typing:true});
-  renderChat();
-
-  try{
-    const systemCtx = buildCoachContext();
-    const apiMessages = chatHistory
-      .filter(m=>!m.typing)
-      .map(m=>({role: m.role==='ai' ? 'assistant' : 'user', content: m.text}));
-
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        system: systemCtx,
-        messages: apiMessages
-      })
-    });
-    const data = await response.json();
-    const textBlock = data?.content?.find(c=>c.type==='text');
-    const replyText = textBlock?.text;
-    chatHistory = chatHistory.filter(m=>!m.typing);
-    if(replyText){
-      chatHistory.push({role:'ai', text: replyText});
-    } else {
-      throw new Error('No text in response');
-    }
-  } catch(err){
-    chatHistory = chatHistory.filter(m=>!m.typing);
-    const resp = AI_FALLBACK_RESPONSES.find(fn=>fn(q.toLowerCase())) ?? AI_FALLBACK_RESPONSES[AI_FALLBACK_RESPONSES.length-1];
-    chatHistory.push({role:'ai', text: typeof resp==='function' ? resp(q.toLowerCase()) : resp});
-  }
-  renderChat();
-}
-
 // ===== BODY STATS =====
 function initBodyStats(){
   if(DB.body.weight)document.getElementById('bs-weight').value=DB.body.weight;
@@ -2620,14 +2222,29 @@ function initBodyStats(){
   renderBodyCalcs(); renderMuscleHeatmap(); renderBodyHistory();
 }
 
+function clampStat(val, min, max){
+  const n = parseFloat(val);
+  return (!isNaN(n) && n>=min && n<=max) ? n : null;
+}
 function saveBodyStats(){
   if(!DB.body) DB.body={bodyHistory:[]};
   if(!DB.body.bodyHistory) DB.body.bodyHistory=[];
-  const w = parseFloat(document.getElementById('bs-weight').value)||null;
+  const wRaw = document.getElementById('bs-weight').value;
+  const w = clampStat(wRaw, 1, 500);
+  if(wRaw && w===null) showToast('⚠️ Weight looks off — skipped');
   DB.body.weight = w;
-  DB.body.height = parseFloat(document.getElementById('bs-height').value)||null;
-  DB.body.bf = parseFloat(document.getElementById('bs-bf').value)||null;
-  DB.body.age = parseFloat(document.getElementById('bs-age').value)||null;
+  const hRaw = document.getElementById('bs-height').value;
+  const h = clampStat(hRaw, 50, 250);
+  if(hRaw && h===null) showToast('⚠️ Height looks off — skipped');
+  DB.body.height = h;
+  const bfRaw = document.getElementById('bs-bf').value;
+  const bf = clampStat(bfRaw, 1, 70);
+  if(bfRaw && bf===null) showToast('⚠️ Body fat % looks off — skipped');
+  DB.body.bf = bf;
+  const ageRaw = document.getElementById('bs-age').value;
+  const age = clampStat(ageRaw, 10, 100);
+  if(ageRaw && age===null) showToast('⚠️ Age looks off — skipped');
+  DB.body.age = age;
   // Append to history instead of overwriting — fixes data loss bug
   if(w){
     DB.body.bodyHistory.push({date:new Date().toISOString(), weight:w});
