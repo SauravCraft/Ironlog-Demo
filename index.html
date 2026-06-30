@@ -169,19 +169,6 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 .today-meta{display:flex;gap:16px;margin-bottom:14px}
 .today-meta span{font-size:13px;color:var(--text-secondary)}
 .today-emoji{position:absolute;right:12px;top:12px;font-size:72px;opacity:.08;z-index:0;line-height:1;filter:blur(1px)}
-.stats-grid{margin:0 16px 10px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.stat-card{padding:16px 16px}
-.stat-label{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
-.stat-value{font-size:28px;font-weight:800;letter-spacing:-.5px;color:var(--text);font-variant-numeric:tabular-nums}
-.stat-sub{font-size:12px;color:var(--muted);margin-top:3px}
-.streak-dots{display:flex;gap:5px;margin-top:10px}
-.s-dot{height:6px;flex:1;border-radius:3px;background:var(--border)}
-.s-dot.on{background:var(--blue)}
-.quick-actions{margin:0 16px 12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.qa-btn{padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:opacity .15s;min-height:72px;justify-content:center}
-.qa-btn:active{opacity:.6}
-.qa-icon{font-size:24px}
-.qa-label{font-size:12px;font-weight:600;color:var(--muted);text-align:center}
 
 /* weekly ring */
 .consistency-ring{position:relative;display:inline-flex;align-items:center;justify-content:center}
@@ -285,6 +272,8 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .cal-dow{font-size:10px;color:var(--muted);text-align:center;padding:4px 0;font-weight:700}
 .cal-day{aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);cursor:pointer;position:relative;transition:all .15s;min-height:34px}
+.cal-cell{display:flex;flex-direction:column;align-items:center;gap:2px;padding-bottom:3px}
+.cal-day-lbl{font-size:8.5px;font-weight:700;color:var(--blue);text-transform:capitalize;letter-spacing:.02em;height:11px}
 .cal-day.has-w{color:var(--text);font-weight:700}
 .cal-day.has-w::after{content:'';width:5px;height:5px;background:var(--blue);border-radius:50%;position:absolute;bottom:2px;left:50%;transform:translateX(-50%)}
 .cal-day.today{background:var(--blue);color:#fff;font-weight:800}
@@ -483,28 +472,40 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
     <div class="today-emoji" id="today-emoji">🏋️</div>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-grid">
-    <div class="stat-card card"><div class="stat-label">🔥 Streak</div><div class="stat-value" id="h-streak">0</div><div class="stat-sub">days in a row</div><div class="streak-dots" id="h-streak-dots"></div></div>
-    <div class="stat-card card"><div class="stat-label">📦 Monthly Vol</div><div class="stat-value" id="h-vol">0</div><div class="stat-sub">kg this month</div></div>
-    <div class="stat-card card"><div class="stat-label">👑 Top PR</div><div class="stat-value" id="h-pr-val" style="font-size:15px">—</div><div class="stat-sub" id="h-pr-name">No PRs yet</div></div>
-    <div class="stat-card card"><div class="stat-label">🏋 Workouts</div><div class="stat-value" id="h-count">0</div><div class="stat-sub">total logged</div></div>
-  </div>
-
-  <!-- PROGRESS SNAPSHOT -->
+  <!-- PROGRESS SNAPSHOT (unified: key stats + trend + heatmap) -->
   <div class="card" style="margin:0 16px 10px;padding:16px" id="home-snapshot">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <div style="font-size:13px;font-weight:700;color:var(--text)">📈 Progress Snapshot</div>
       <div style="font-size:12px;color:var(--blue);font-weight:700;cursor:pointer" onclick="navTo('progress')">Full report ›</div>
     </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+      <div style="text-align:center">
+        <div style="font-size:18px;font-weight:800" id="h-streak">0</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">🔥 Streak</div>
+      </div>
+      <div style="text-align:center;border-left:1px solid rgba(255,255,255,0.06);border-right:1px solid rgba(255,255,255,0.06)">
+        <div style="font-size:18px;font-weight:800" id="h-vol">0</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">📦 Vol (mo)</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:18px;font-weight:800" id="h-count">0</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">🏋 Workouts</div>
+      </div>
+    </div>
+    <div id="home-pr-row" style="display:none;align-items:center;gap:8px;background:var(--surface);border-radius:10px;padding:9px 12px;margin-bottom:12px">
+      <span style="font-size:14px">👑</span>
+      <div style="flex:1;font-size:12px;color:var(--muted)">Top PR · <span id="h-pr-name" style="color:var(--text);font-weight:700">—</span></div>
+      <div id="h-pr-val" style="font-size:13px;font-weight:800;color:var(--amber)">—</div>
+    </div>
     <div id="home-snap-text" style="font-size:13px;color:var(--muted);margin-bottom:10px">Log your first workout to start tracking trends.</div>
+    <div style="font-size:10px;color:var(--dim);margin-bottom:5px">Last 14 days</div>
     <div id="home-heat-strip" style="display:flex;gap:4px"></div>
   </div>
 
   <!-- QUICK ACTIONS -->
-  <div class="quick-actions">
-    <div class="qa-btn card" onclick="navTo('history')"><div class="qa-icon">🕓</div><div class="qa-label">History</div></div>
-    <div class="qa-btn card" onclick="navTo('bodystats')"><div class="qa-icon">📏</div><div class="qa-label">Body Stats</div></div>
+  <div style="display:flex;gap:8px;margin:0 16px 12px">
+    <div class="card" style="flex:1;display:flex;align-items:center;gap:8px;padding:11px 14px;cursor:pointer" onclick="navTo('history')"><span style="font-size:17px">🕓</span><span style="font-size:13px;font-weight:700">History</span></div>
+    <div class="card" style="flex:1;display:flex;align-items:center;gap:8px;padding:11px 14px;cursor:pointer" onclick="navTo('bodystats')"><span style="font-size:17px">📏</span><span style="font-size:13px;font-weight:700">Body Stats</span></div>
   </div>
 
   <div class="sec-title" style="margin-top:6px">Recent Workouts</div>
@@ -593,6 +594,7 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
     <div class="info-row card"><div class="info-left">🔥 Current Streak</div><div class="info-right"><span id="p-streak">0</span> days ›</div></div>
     <div class="info-row card"><div class="info-left">🏋 Total Workouts</div><div class="info-right"><span id="p-total">0</span> ›</div></div>
     <div class="info-row card"><div class="info-left">⏱ Avg Duration</div><div class="info-right"><span id="p-dur">—</span> ›</div></div>
+    <div class="info-row card" onclick="openReport()"><div class="info-left">📄 Monthly Report</div><div class="info-right">View ›</div></div>
     <div class="chart-card card" id="bw-trend-card" style="display:none">
       <div class="chart-hdr"><div class="chart-lbl">Body Weight Trend</div><div class="chart-sub" id="bw-trend-sub">—</div></div>
       <div id="bw-trend-chart"></div>
@@ -604,6 +606,8 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
     <div id="strength-prs"></div>
     <div class="sec-title" style="margin-top:6px">PR Timeline</div>
     <div class="card" style="margin:0 16px 14px" id="pr-timeline"></div>
+    <div class="sec-title">Main Exercises</div>
+    <div class="card" style="margin:0 16px 14px" id="main-ex-list"></div>
   </div>
 
   <!-- VOLUME TAB -->
@@ -615,6 +619,25 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
     <div class="chart-card card">
       <div class="chart-hdr"><div class="chart-lbl">Volume by Muscle</div><div class="chart-sub">All time</div></div>
       <div id="muscle-vol-chart"></div>
+    </div>
+    <div class="card muscle-heat" style="margin:0 16px 14px">
+      <div class="chart-hdr" style="margin-bottom:6px"><div class="chart-lbl">Muscle Heatmap</div><div class="chart-sub">All time</div></div>
+      <div class="muscle-svg-wrap">
+        <div>
+          <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:8px">Front</div>
+          <svg width="100" height="180" viewBox="0 0 100 180" id="prog-body-front"></svg>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:8px">Back</div>
+          <svg width="100" height="180" viewBox="0 0 100 180" id="prog-body-back"></svg>
+        </div>
+      </div>
+      <div class="heat-legend" style="margin-top:12px">
+        <div style="display:flex;align-items:center;gap:5px"><div class="heat-dot" style="background:#1A1A1A;border:1px solid #333"></div><span class="heat-lbl">None</span></div>
+        <div style="display:flex;align-items:center;gap:5px"><div class="heat-dot" style="background:#1D4E89"></div><span class="heat-lbl">Low</span></div>
+        <div style="display:flex;align-items:center;gap:5px"><div class="heat-dot" style="background:#2563EB"></div><span class="heat-lbl">Med</span></div>
+        <div style="display:flex;align-items:center;gap:5px"><div class="heat-dot" style="background:#3B82F6"></div><span class="heat-lbl">High</span></div>
+      </div>
     </div>
   </div>
 
@@ -647,6 +670,11 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
     <input class="input" id="hist-search" placeholder="Search workouts or exercises…" oninput="renderHist(null, this.value)" autocomplete="off">
   </div>
   <div class="cal-card card">
+    <div class="cal-stats-row" id="cal-stats-row" style="display:flex;border-bottom:1px solid rgba(255,255,255,0.06);margin:-2px -2px 12px;padding-bottom:12px">
+      <div style="flex:1;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700"><span>🔥</span><span id="cal-week-streak">0</span><span style="color:var(--muted);font-weight:600;font-size:13px">week streak</span></div>
+      <div style="width:1px;background:rgba(255,255,255,0.06)"></div>
+      <div style="flex:1;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:700"><span>🌙</span><span id="cal-rest-days">0</span><span style="color:var(--muted);font-weight:600;font-size:13px">rest days</span></div>
+    </div>
     <div class="cal-hdr">
       <div class="cal-nav-btn" onclick="changeMonth(-1)">‹</div>
       <div class="cal-month" id="cal-lbl">May 2024</div>
@@ -743,6 +771,68 @@ body{height:100%;height:100dvh;overflow:hidden;background:var(--bg);font-family:
       <div style="display:flex;align-items:center;gap:5px"><div class="heat-dot" style="background:#3B82F6"></div><span class="heat-lbl">High</span></div>
     </div>
   </div>
+</div>
+
+<!-- STATISTICS -->
+<!-- MONTHLY REPORT -->
+<div id="report-screen" class="screen">
+  <div class="screen-header">
+    <div class="back-link" onclick="goBack()"><svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 2 2 8 8 14"/></svg>Back</div>
+    <div class="screen-title" id="report-title" style="font-size:20px">Report</div>
+    <div style="width:30px"></div>
+  </div>
+
+  <div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:0 16px 14px">
+    <div class="cal-nav-btn" onclick="changeReportMonth(-1)">‹</div>
+    <div id="report-month-lbl" style="font-size:14px;font-weight:700;color:var(--muted)"></div>
+    <div class="cal-nav-btn" onclick="changeReportMonth(1)">›</div>
+  </div>
+
+  <!-- Trend chart + metric toggle -->
+  <div class="card" style="margin:0 16px 14px;padding:16px">
+    <div id="report-metric-val" style="font-size:26px;font-weight:800"></div>
+    <div id="report-metric-delta" style="font-size:13px;font-weight:700;margin-top:2px"></div>
+    <div class="bar-chart" id="report-chart" style="margin-top:14px"></div>
+    <div style="display:flex;gap:5px;margin-top:6px" id="report-chart-lbl"></div>
+    <div class="chip-row" style="padding:14px 0 0;margin:0" id="report-metric-toggle">
+      <div class="chip active" onclick="setReportMetric('workouts',this)">Workouts</div>
+      <div class="chip" onclick="setReportMetric('duration',this)">Duration</div>
+      <div class="chip" onclick="setReportMetric('volume',this)">Volume</div>
+      <div class="chip" onclick="setReportMetric('sets',this)">Sets</div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="sec-title">Summary</div>
+  <div class="prog-grid" id="report-summary"></div>
+
+  <!-- Personal Records -->
+  <div class="sec-title">Personal Records</div>
+  <div class="card" style="margin:0 16px 14px" id="report-prs"></div>
+
+  <!-- Workout Days Log -->
+  <div class="sec-title">Workout Days Log</div>
+  <div class="card" style="margin:0 16px 14px;padding:16px">
+    <div style="text-align:center;margin-bottom:10px">
+      <div style="font-size:26px">🔥</div>
+      <div style="font-size:14px;font-weight:700;margin-top:2px" id="report-streak-lbl">0 Week Streak</div>
+    </div>
+    <div class="cal-grid" id="report-cal-grid"></div>
+  </div>
+
+  <!-- Muscle Distribution -->
+  <div class="sec-title">Muscle Distribution</div>
+  <div class="card" style="margin:0 16px 14px;padding:16px;text-align:center">
+    <svg viewBox="0 0 240 220" id="report-radar" style="width:100%;max-width:280px;height:auto"></svg>
+    <div style="display:flex;justify-content:center;gap:16px;margin-top:6px;font-size:11px;color:var(--muted)">
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:50%;background:var(--blue)"></div>Current</div>
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:50%;background:var(--dim)"></div>Previous</div>
+    </div>
+  </div>
+
+  <!-- Top Exercises -->
+  <div class="sec-title">Top Exercises</div>
+  <div class="card" style="margin:0 16px 80px" id="report-top-ex"></div>
 </div>
 
 <!-- COMPLETE -->
@@ -995,7 +1085,7 @@ async function load(){
 }
 
 // ===== NAV =====
-const ALL_SCREENS=['home','workout','addex','plan','progress','history','profile','bodystats','complete'];
+const ALL_SCREENS=['home','workout','addex','plan','progress','history','profile','bodystats','report','complete'];
 const NAV_SCREENS=['home','plan','progress','profile'];
 const NO_NAV=['workout','complete'];
 let screenStack=[];
@@ -1021,6 +1111,7 @@ function navTo(s, isBack=false){
   if(s==='profile') refreshProfile();
   if(s==='addex'){ renderExList(); renderRecentEx(); }
   if(s==='bodystats') initBodyStats();
+  if(s==='report') renderReport();
   screenStack.push(s);
 }
 
@@ -1120,27 +1211,16 @@ function refreshHome(){
   animateStatNumber('h-vol', Math.round(monthVol));
   document.getElementById('h-count').textContent=DB.workouts.length;
 
-  // Streak dots
-  const sd=document.getElementById('h-streak-dots');
-  sd.innerHTML='';
-  for(let i=0;i<7;i++){const d=document.createElement('div');d.className='s-dot'+(i<streak?' on':'');sd.appendChild(d);}
-  // Rest day protection badge
-  const streakSub=document.querySelector('#h-streak').closest('.stat-card').querySelector('.stat-sub');
-  if(isRestDay()&&streak>0){
-    streakSub.innerHTML='days in a row <span style="display:block;font-size:10px;font-weight:700;color:var(--amber);margin-top:3px">🛡 Rest day · streak safe</span>';
-  } else {
-    streakSub.textContent='days in a row';
-  }
-
   // PR
   const prs=Object.entries(DB.prs);
+  const prRow=document.getElementById('home-pr-row');
   if(prs.length>0){
     const best=prs.reduce((a,b)=>b[1].w>a[1].w?b:a);
     document.getElementById('h-pr-val').textContent=best[1].w+' × '+best[1].r;
     document.getElementById('h-pr-name').textContent=best[0];
+    prRow.style.display='flex';
   } else {
-    document.getElementById('h-pr-val').textContent='—';
-    document.getElementById('h-pr-name').textContent='Log sets to unlock';
+    prRow.style.display='none';
   }
 
   // Today card
@@ -1171,7 +1251,7 @@ function refreshHome(){
       snapEl.innerHTML=`${fmtN(thisWeekVol)}${DB.settings.units} logged this week.`;
     }
   }
-  renderHeatStrip('home-heat-strip',28);
+  renderHeatStrip('home-heat-strip',14);
 
   // Recent list
   const recent=[...DB.workouts].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,3);
@@ -1871,6 +1951,8 @@ function refreshProgress(){
 
   renderBodyWeightTrend();
   renderPrTimeline();
+  renderMuscleHeatmap('prog-');
+  renderMainExercises();
 }
 
 function renderSparkline(id,vals,max){
@@ -1958,6 +2040,22 @@ function togglePlanEx(i){
 }
 
 // ===== HISTORY =====
+function dayTypeLabel(y,m,d){
+  const key=dKey(new Date(y,m,d));
+  const dws=DB.workouts.filter(w=>dKey(new Date(w.date))===key);
+  if(!dws.length)return'';
+  const catVol={};
+  dws.forEach(w=>w.exercises?.forEach(e=>{
+    const ex=EX_DB.find(x=>x.n===e.name); const c=ex?.c||'Other';
+    const vol=e.sets?.filter(s=>s.done).reduce((s,st)=>s+(parseFloat(st.w)||0)*(parseInt(st.r)||0),0)||0;
+    catVol[c]=(catVol[c]||0)+vol;
+  }));
+  const top=Object.entries(catVol).sort((a,b)=>b[1]-a[1])[0];
+  const map={Chest:'Push',Shoulders:'Push',Back:'Pull',Legs:'Legs',Core:'Core',Cardio:'Cardio',Arms:'Arms'};
+  if(top&&top[1]>0) return map[top[0]]||top[0];
+  return dws[0].name.split(' ')[0];
+}
+
 function renderCal(){
   const y=calDate.getFullYear(), m=calDate.getMonth();
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1971,9 +2069,17 @@ function renderCal(){
   for(let d=1;d<=daysInM;d++){
     const isTdy=d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear();
     const hasW=woDays.has(d);
-    html+=`<div class="cal-day${isTdy?' today':hasW?' has-w':''}" onclick="calDayClick(${y},${m},${d})">${d}</div>`;
+    const lbl=hasW?dayTypeLabel(y,m,d):'';
+    html+=`<div class="cal-cell"><div class="cal-day${isTdy?' today':hasW?' has-w':''}" onclick="calDayClick(${y},${m},${d})">${d}</div><div class="cal-day-lbl">${lbl}</div></div>`;
   }
   document.getElementById('cal-grid').innerHTML=html;
+
+  // Header stats: streak (in weeks) + rest days this month
+  document.getElementById('cal-week-streak').textContent=Math.floor(calcStreak()/7);
+  const isPastOrCurrentMonth=(y<today.getFullYear())||(y===today.getFullYear()&&m<=today.getMonth());
+  const dayCountSoFar=(y===today.getFullYear()&&m===today.getMonth())?today.getDate():daysInM;
+  const restDays=isPastOrCurrentMonth?Math.max(0,dayCountSoFar-woDays.size):daysInM-woDays.size;
+  document.getElementById('cal-rest-days').textContent=restDays;
 }
 
 function calDayClick(y,m,d){
@@ -2336,7 +2442,7 @@ function renderBodyCalcs(){
   document.getElementById('bs-calcs').innerHTML=html||'<div style="grid-column:1/-1;color:var(--muted);font-size:13px;padding:8px">Fill in your stats above to see calculations</div>';
 }
 
-function renderMuscleHeatmap(){
+function renderMuscleHeatmap(prefix=''){
   // Calculate volume per category
   const catVol={Chest:0,Back:0,Shoulders:0,Legs:0,Arms:0,Core:0};
   DB.workouts.forEach(w=>w.exercises?.forEach(e=>{
@@ -2356,7 +2462,7 @@ function renderMuscleHeatmap(){
   };
 
   // Front body SVG
-  document.getElementById('body-front').innerHTML=`
+  document.getElementById(prefix+'body-front').innerHTML=`
     <!-- Head --><ellipse cx="50" cy="15" rx="12" ry="14" fill="#252525" stroke="#333" stroke-width="1"/>
     <!-- Neck --><rect x="44" y="27" width="12" height="8" rx="3" fill="#252525"/>
     <!-- Chest --><rect x="28" y="35" width="44" height="28" rx="8" fill="${heatColor(catVol.Chest)}" stroke="#333" stroke-width="1"/>
@@ -2372,7 +2478,7 @@ function renderMuscleHeatmap(){
     <!-- Shins --><rect x="30" y="147" width="17" height="30" rx="6" fill="${heatColor(catVol.Legs)}" stroke="#333" stroke-width="1" opacity=".6"/>
     <rect x="53" y="147" width="17" height="30" rx="6" fill="${heatColor(catVol.Legs)}" stroke="#333" stroke-width="1" opacity=".6"/>`;
 
-  document.getElementById('body-back').innerHTML=`
+  document.getElementById(prefix+'body-back').innerHTML=`
     <!-- Head --><ellipse cx="50" cy="15" rx="12" ry="14" fill="#252525" stroke="#333" stroke-width="1"/>
     <!-- Neck --><rect x="44" y="27" width="12" height="8" rx="3" fill="#252525"/>
     <!-- Traps --><ellipse cx="50" cy="38" rx="22" ry="8" fill="${heatColor(catVol.Back)}" stroke="#333" stroke-width="1"/>
@@ -2388,7 +2494,224 @@ function renderMuscleHeatmap(){
     <rect x="54" y="146" width="15" height="28" rx="6" fill="${heatColor(catVol.Legs)}" stroke="#333" stroke-width="1" opacity=".7"/>`;
 }
 
-// ===== PER-EXERCISE PROGRESS =====
+// ===== STATISTICS: MAIN EXERCISES + MONTHLY REPORT =====
+function renderMainExercises(){
+  const el=document.getElementById('main-ex-list');
+  if(!el)return;
+  const counts={};
+  DB.workouts.forEach(w=>w.exercises?.forEach(e=>{
+    const sets=e.sets?.filter(s=>s.done).length||0;
+    if(!sets)return;
+    if(!counts[e.name])counts[e.name]={sets:0,sessions:0,cat:e.cat||EX_DB.find(x=>x.n===e.name)?.c||'Other'};
+    counts[e.name].sets+=sets;
+    counts[e.name].sessions+=1;
+  }));
+  const list=Object.entries(counts).sort((a,b)=>b[1].sets-a[1].sets).slice(0,8);
+  if(!list.length){ el.innerHTML='<div class="empty" style="padding:24px"><div class="empty-icon">🏋</div><div class="empty-title">No exercises logged yet</div></div>'; return; }
+  el.innerHTML=list.map(([name,d])=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #1E1E1E">
+      <div style="width:34px;height:34px;border-radius:10px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${EX_DB.find(x=>x.n===name)?.i||'⚡'}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">${d.cat} · ${d.sessions} session${d.sessions===1?'':'s'}</div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--blue)">${d.sets} sets</div>
+    </div>`).join('');
+}
+
+
+
+// ===== FULL MONTHLY REPORT SCREEN =====
+let reportDate=new Date();
+let reportMetric='workouts';
+const CATS6=['Back','Chest','Core','Shoulders','Arms','Legs'];
+
+function openReport(){ reportDate=new Date(); reportMetric='workouts'; navTo('report'); }
+function changeReportMonth(dir){ reportDate.setMonth(reportDate.getMonth()+dir); renderReport(); }
+
+function monthMetrics(y,m){
+  const ws=DB.workouts.filter(w=>{const d=new Date(w.date);return d.getFullYear()===y&&d.getMonth()===m;});
+  const volume=ws.reduce((s,w)=>s+calcVol(w),0);
+  const duration=ws.reduce((s,w)=>s+(w.duration||0),0);
+  const sets=ws.reduce((s,w)=>s+(w.exercises||[]).reduce((s2,e)=>s2+(e.sets?.filter(x=>x.done).length||0),0),0);
+  const catVol={Back:0,Chest:0,Core:0,Shoulders:0,Arms:0,Legs:0};
+  ws.forEach(w=>w.exercises?.forEach(e=>{
+    const ex=EX_DB.find(x=>x.n===e.name); const c=ex?.c;
+    const v=e.sets?.filter(s=>s.done).reduce((s,st)=>s+(parseFloat(st.w)||0)*(parseInt(st.r)||0),0)||0;
+    if(catVol.hasOwnProperty(c)) catVol[c]+=v;
+  }));
+  return {workouts:ws.length, duration, volume, sets, catVol, list:ws};
+}
+
+function getMonthlyPRs(y,m){
+  const names=[...new Set(DB.workouts.flatMap(w=>(w.exercises||[]).map(e=>e.name)))];
+  const byEx={};
+  names.forEach(name=>{
+    const pts=getExerciseHistory(name);
+    let maxW=0,maxE1=0,maxVol=0;
+    pts.forEach(p=>{
+      const d=new Date(p.date);
+      const inMonth=d.getFullYear()===y&&d.getMonth()===m;
+      const vol=p.w*p.r;
+      const recs=[];
+      if(p.w>maxW){ if(inMonth)recs.push({type:'Weight',value:p.w+'kg'}); maxW=p.w; }
+      if(p.e1rm>maxE1){ if(inMonth)recs.push({type:'1RM',value:p.e1rm+'kg'}); maxE1=p.e1rm; }
+      if(vol>maxVol){ if(inMonth)recs.push({type:'Volume',value:fmtN(vol)+'kg'}); maxVol=vol; }
+      if(recs.length){ if(!byEx[name])byEx[name]=[]; byEx[name].push(...recs); }
+    });
+  });
+  return Object.entries(byEx);
+}
+
+function setReportMetric(metric,el){
+  reportMetric=metric;
+  document.querySelectorAll('#report-metric-toggle .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderReportChart();
+}
+
+function renderReportChart(){
+  const months=['J','F','M','A','M','J','J','A','S','O','N','D'];
+  const ref=new Date(reportDate);
+  const vals=[];
+  for(let i=11;i>=0;i--){
+    const d=new Date(ref.getFullYear(),ref.getMonth()-i,1);
+    const mm=monthMetrics(d.getFullYear(),d.getMonth());
+    vals.push(mm[reportMetric]);
+  }
+  const cur=vals[vals.length-1], prev=vals[vals.length-2]||0;
+  const delta=cur-prev;
+  const fmtVal=v=>{
+    if(reportMetric==='duration')return fmtDur(v);
+    if(reportMetric==='volume')return fmtN(v)+(v>=1000?'kg':'kg');
+    return Math.round(v);
+  };
+  document.getElementById('report-metric-val').textContent=fmtVal(cur);
+  const dEl=document.getElementById('report-metric-delta');
+  if(delta===0){ dEl.innerHTML='<span style="color:var(--muted)">— no change vs last month</span>'; }
+  else{
+    const up=delta>0;
+    dEl.innerHTML=`<span style="color:${up?'var(--green)':'var(--red)'}">${up?'▲':'▼'} ${fmtVal(Math.abs(delta))}</span> <span style="color:var(--muted)">vs last month</span>`;
+  }
+  const mx=Math.max(...vals,1);
+  document.getElementById('report-chart').innerHTML=vals.map((v,i)=>`<div class="bc-wrap"><div class="bc-bar${i===11?' active':''}" style="height:${Math.max(4,Math.round(v/mx*86))}px"></div></div>`).join('');
+  document.getElementById('report-chart-lbl').innerHTML=months.map((mo,i)=>{
+    const idx=(ref.getMonth()-11+i+1200)%12;
+    return `<div style="flex:1;text-align:center;font-size:9px;color:${i===11?'var(--blue)':'var(--dim)'}">${months[idx]}</div>`;
+  }).join('');
+}
+
+function radarSVG(curCat,prevCat){
+  const cx=120,cy=110,maxR=78;
+  const max=Math.max(...Object.values(curCat),...Object.values(prevCat),1);
+  const angles=[-120,-60,0,60,120,180];
+  const ptFor=(cat,ring)=>angles.map((a,i)=>{
+    const v=cat[CATS6[i]]||0;
+    const r=(v/max)*maxR*ring;
+    const rad=a*Math.PI/180;
+    return `${(cx+r*Math.cos(rad)).toFixed(1)},${(cy+r*Math.sin(rad)).toFixed(1)}`;
+  }).join(' ');
+  let grid='';
+  [0.25,0.5,0.75,1].forEach(ring=>{
+    const pts=angles.map(a=>{const rad=a*Math.PI/180;return `${(cx+maxR*ring*Math.cos(rad)).toFixed(1)},${(cy+maxR*ring*Math.sin(rad)).toFixed(1)}`;}).join(' ');
+    grid+=`<polygon points="${pts}" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>`;
+  });
+  const labels=angles.map((a,i)=>{
+    const rad=a*Math.PI/180;
+    const lx=cx+(maxR+24)*Math.cos(rad), ly=cy+(maxR+24)*Math.sin(rad);
+    const anchor=Math.cos(rad)>0.3?'start':Math.cos(rad)<-0.3?'end':'middle';
+    return `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" fill="var(--muted)" font-size="11" text-anchor="${anchor}" dominant-baseline="middle">${CATS6[i]}</text>`;
+  }).join('');
+  const curPts=ptFor(curCat,1), prevPts=ptFor(prevCat,1);
+  return `${grid}
+    <polygon points="${prevPts}" fill="rgba(161,161,170,0.12)" stroke="var(--dim)" stroke-width="1.5"/>
+    <polygon points="${curPts}" fill="rgba(59,130,246,0.22)" stroke="var(--blue)" stroke-width="2"/>
+    ${labels}`;
+}
+
+function renderReportCal(y,m){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('report-month-lbl').textContent=months[m]+' '+y;
+  document.getElementById('report-title').textContent=months[m].slice(0,3)+' Report';
+  const woDays=new Set(DB.workouts.filter(w=>{const d=new Date(w.date);return d.getFullYear()===y&&d.getMonth()===m;}).map(w=>new Date(w.date).getDate()));
+  const today=new Date();
+  const firstDow=(new Date(y,m,1).getDay()+6)%7;
+  const daysInM=new Date(y,m+1,0).getDate();
+  let html='<div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div><div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div><div class="cal-dow">S</div>';
+  const firstDowSun=new Date(y,m,1).getDay();
+  for(let i=0;i<firstDowSun;i++)html+='<div></div>';
+  for(let d=1;d<=daysInM;d++){
+    const isTdy=d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear();
+    const hasW=woDays.has(d);
+    html+=hasW?`<div class="cal-day has-w" style="background:var(--blue);color:#fff;font-weight:800">${d}</div>`:`<div class="cal-day${isTdy?' today':''}">${d}</div>`;
+  }
+  document.getElementById('report-cal-grid').innerHTML=html;
+  document.getElementById('report-streak-lbl').textContent=Math.floor(calcStreak()/7)+' Week Streak';
+}
+
+function renderReport(){
+  const y=reportDate.getFullYear(), m=reportDate.getMonth();
+  renderReportChart();
+  renderReportCal(y,m);
+
+  // Summary grid (current vs previous month deltas)
+  const cur=monthMetrics(y,m);
+  const prevD=new Date(y,m-1,1);
+  const prev=monthMetrics(prevD.getFullYear(),prevD.getMonth());
+  const deltaRow=(label,curV,prevV,fmt)=>{
+    const d=curV-prevV;
+    const arrow=d===0?'':(d>0?`<span style="color:var(--green)">▲ ${fmt(Math.abs(d))}</span>`:`<span style="color:var(--red)">▼ ${fmt(Math.abs(d))}</span>`);
+    return `<div class="ps-card card"><div class="ps-lbl">${label}</div><div class="ps-val" style="font-size:22px">${fmt(curV)}</div><div style="font-size:11px;margin-top:4px">${arrow}</div></div>`;
+  };
+  document.getElementById('report-summary').innerHTML=
+    deltaRow('Workouts',cur.workouts,prev.workouts,v=>Math.round(v))+
+    deltaRow('Duration',cur.duration,prev.duration,fmtDur)+
+    deltaRow('Volume',cur.volume,prev.volume,v=>fmtN(v)+'kg')+
+    deltaRow('Sets',cur.sets,prev.sets,v=>Math.round(v));
+
+  // PRs
+  const prList=getMonthlyPRs(y,m);
+  const prEl=document.getElementById('report-prs');
+  const totalPRs=prList.reduce((s,[,recs])=>s+recs.length,0);
+  if(!prList.length){
+    prEl.innerHTML='<div class="empty" style="padding:24px"><div class="empty-icon">🏅</div><div class="empty-title">No new PRs this month</div></div>';
+  } else {
+    prEl.innerHTML=`<div style="text-align:center;padding:14px 0 4px"><div style="font-size:24px">🏅</div><div style="font-size:14px;font-weight:700;margin-top:2px">${totalPRs} new PR${totalPRs===1?'':'s'}</div></div>`+
+      prList.slice(0,8).map(([name,recs])=>`
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-top:1px solid #1E1E1E">
+        <div style="width:32px;height:32px;border-radius:10px;background:var(--amber-dim);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${EX_DB.find(x=>x.n===name)?.i||'⚡'}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;margin-bottom:4px">${name}</div>
+          ${recs.map(r=>`<div style="font-size:12px;color:var(--amber);margin-top:2px">🏅 ${r.type} - ${r.value}</div>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+
+  // Muscle distribution radar
+  document.getElementById('report-radar').innerHTML=radarSVG(cur.catVol,prev.catVol);
+
+  // Top exercises this month
+  const exCounts={};
+  cur.list.forEach(w=>w.exercises?.forEach(e=>{
+    const n=e.sets?.filter(s=>s.done).length||0;
+    if(!n)return;
+    if(!exCounts[e.name])exCounts[e.name]={sessions:0};
+    exCounts[e.name].sessions+=1;
+  }));
+  const topEx=Object.entries(exCounts).sort((a,b)=>b[1].sessions-a[1].sessions).slice(0,8);
+  const teEl=document.getElementById('report-top-ex');
+  if(!topEx.length){
+    teEl.innerHTML='<div class="empty" style="padding:24px"><div class="empty-icon">🏋</div><div class="empty-title">No exercises this month</div></div>';
+  } else {
+    teEl.innerHTML=topEx.map(([name,d])=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #1E1E1E">
+        <div style="width:34px;height:34px;border-radius:10px;background:var(--blue-dim);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${EX_DB.find(x=>x.n===name)?.i||'⚡'}</div>
+        <div style="flex:1;font-size:13px;font-weight:700">${name}</div>
+        <div style="font-size:12px;color:var(--muted)">${d.sessions} time${d.sessions===1?'':'s'}</div>
+      </div>`).join('');
+  }
+}
+
 function getExerciseHistory(name){
   const pts=[];
   [...DB.workouts].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(w=>{
